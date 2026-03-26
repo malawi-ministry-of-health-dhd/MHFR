@@ -4,7 +4,6 @@ import {
   Table,
   TableHeaderRow,
   PagingPanel,
-  TableFilterRow,
   Toolbar,
   SearchPanel
 } from "@devexpress/dx-react-grid-material-ui";
@@ -13,8 +12,6 @@ import {
   IntegratedSorting,
   PagingState,
   IntegratedPaging,
-  FilteringState,
-  IntegratedFiltering,
   SearchState
 } from "@devexpress/dx-react-grid";
 import { withStyles } from "@material-ui/core";
@@ -24,8 +21,46 @@ const TableComponentBase = ({ classes, ...restProps }: any) => (
   <Table.Table {...restProps} className={classes.tableStriped} />
 );
 
+const buildSearchableText = (value: any): string => {
+  if (value == null) {
+    return "";
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(buildSearchableText).join(" ");
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value)
+      .map(buildSearchableText)
+      .join(" ");
+  }
+
+  return String(value);
+};
+
 function FacilityTable(props: Props) {
   const { defaultSorting, pageSize, onSelected, data, columns } = props;
+  const [searchValue, setSearchValue] = React.useState("");
+  const searchableColumns = React.useMemo(
+    () => Array.from(new Set(columns.map(column => column.name))),
+    [columns]
+  );
+  const searchedRows = React.useMemo(() => {
+    const normalizedSearch = searchValue.trim().toLowerCase();
+
+    if (normalizedSearch.length === 0) {
+      return data;
+    }
+
+    return data.filter((row: any) =>
+      searchableColumns.some(columnName =>
+        buildSearchableText(row[columnName])
+          .toLowerCase()
+          .includes(normalizedSearch)
+      )
+    );
+  }, [data, searchableColumns, searchValue]);
 
   const TableRow = ({ row, ...restProps }: any) => (
     <Table.Row
@@ -39,14 +74,15 @@ function FacilityTable(props: Props) {
 
   return (
     <div className="table">
-      <Grid rows={data} columns={columns}>
+      <Grid rows={searchedRows} columns={columns}>
+        <SearchState
+          value={searchValue}
+          onValueChange={setSearchValue}
+        />
         <SortingState defaultSorting={defaultSorting} />
         <IntegratedSorting />
         <PagingState defaultCurrentPage={0} pageSize={pageSize} />
         <IntegratedPaging />
-        <FilteringState defaultFilters={[]} />
-        <SearchState />
-        <IntegratedFiltering />
         <Table tableComponent={StyledTable} rowComponent={TableRow} />
         <TableHeaderRow showSortingControls />
         <Toolbar />
