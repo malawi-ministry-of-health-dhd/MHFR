@@ -1,70 +1,12 @@
 import React from "react";
-// @ts-ignore
-import { compose, withProps, withHandlers } from "recompose";
+import { Map, Marker } from "react-leaflet";
+import OpenFreeMapLayer from "../../atoms/OpenFreeMapLayer";
 import {
-  withScriptjs,
-  withGoogleMap,
-  GoogleMap,
-  Marker
-} from "react-google-maps";
+  buildOpenStreetMapLocationUrl,
+  defaultMarkerIcon
+} from "../../../services/leaflet";
 
-const MFLGoogleMapBg = compose(
-  withProps({
-    googleMapURL:
-      "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-MrJ0WnBYzAA1A2SwzyCX4UTnDi-fjw8&v=3.exp&libraries=geometry,drawing,places",
-    loadingElement: (
-      <div
-        style={{
-          minHeight: `57vh`
-        }}
-      />
-    ),
-    containerElement: (
-      <div
-        test-id="fgooglemap"
-        style={{
-          height: `57vh`,
-          overflow: "hidden"
-        }}
-      />
-    ),
-    mapElement: (
-      <div
-        style={{
-          height: `100%`
-        }}
-      />
-    )
-  }),
-  withHandlers(() => {
-    const refs = {
-      map: undefined
-    };
-
-    return {
-      onMapMounted: () => (ref: any) => {
-        refs.map = ref;
-      },
-      onClick: ({ onClick }: any) => () => {
-        //   @ts-ignore
-        onClick(refs.map.getProjection());
-      }
-    };
-  }),
-  withScriptjs,
-  withGoogleMap
-)((props: Props) => {
-  const { position, isMarkerShown, onLocationClick } = props;
-  return (
-    <GoogleMap
-      onClick={pro => onLocationClick(pro)}
-      defaultZoom={6.5}
-      defaultCenter={{ lat: position.lat, lng: position.lng }}
-    >
-      {isMarkerShown && <Marker position={position} />}
-    </GoogleMap>
-  );
-});
+const mapHeight = `57vh`;
 
 type Props = {
   position: {
@@ -74,4 +16,54 @@ type Props = {
   isMarkerShown?: boolean;
   onLocationClick: Function;
 };
-export default MFLGoogleMapBg;
+
+const LocationPickerMap = (props: Props) => {
+  const { position, isMarkerShown, onLocationClick } = props;
+  const latitude = Number(position.lat);
+  const longitude = Number(position.lng);
+  const center = [latitude, longitude];
+
+  return (
+    <div
+      className="mhfr-map-shell mhfr-map-shell--picker"
+      test-id="fgooglemap"
+      style={{
+        height: mapHeight,
+        overflow: "hidden",
+        position: "relative"
+      }}
+    >
+      <Map
+        attributionControl
+        center={center as any}
+        className="mhfr-map"
+        maxZoom={19}
+        minZoom={1}
+        zoomControl
+        zoom={6.5}
+        style={{ height: mapHeight, width: "100%" }}
+        onclick={event =>
+          onLocationClick({
+            lat: event.latlng.lat,
+            lng: event.latlng.lng
+          })
+        }
+      >
+        <OpenFreeMapLayer />
+        {isMarkerShown && (
+          <Marker icon={defaultMarkerIcon} position={center as any} />
+        )}
+      </Map>
+      <a
+        className="mhfr-map-action"
+        href={buildOpenStreetMapLocationUrl(position, 6)}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View larger map
+      </a>
+    </div>
+  );
+};
+
+export default LocationPickerMap;
