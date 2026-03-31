@@ -205,6 +205,7 @@ class index extends Component<any> {
     return (
       <Dashboard
         cardsData={this.getFacilitiesByTypeData()}
+        districts={this.props.districts.map((district: any) => district.district_name)}
         licenseStatusGrapphData={this.getRegulatoryBarData()}
         operationalStatusGraphData={this.getOperationalBarData()}
         selectedDistricts={this.state.districtsFilter}

@@ -1,4 +1,14 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
+import {
+  Checkbox,
+  FormControl,
+  InputBase,
+  ListSubheader,
+  ListItemText,
+  MenuItem,
+  Select
+} from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
 import styled, { css } from "styled-components";
 import Container from "../../components/atoms/Container";
 //@ts-ignore
@@ -56,6 +66,7 @@ const getActiveOperationalStatus = (data: Array<StatusDatum>) =>
 const Dashboard = (props: Props) => {
   const {
     cardsData,
+    districts,
     licenseStatusGrapphData,
     operationalStatusGraphData,
     selectedDistricts,
@@ -63,6 +74,7 @@ const Dashboard = (props: Props) => {
     onMapClick,
     onSummaryCardClick
   } = props;
+  const [mobileDistrictSearch, setMobileDistrictSearch] = useState("");
 
   const primaryCard = cardsData[0];
   const secondaryCards = cardsData.slice(1);
@@ -87,6 +99,51 @@ const Dashboard = (props: Props) => {
     day: "numeric",
     year: "numeric"
   });
+  const districtNames = useMemo(
+    () =>
+      districts
+        .filter(Boolean)
+        .slice()
+        .sort((left, right) => left.localeCompare(right)),
+    [districts]
+  );
+  const filteredDistrictNames = useMemo(() => {
+    const query = mobileDistrictSearch.trim().toLowerCase();
+
+    if (!query) {
+      return districtNames;
+    }
+
+    return districtNames.filter(district =>
+      district.toLowerCase().includes(query)
+    );
+  }, [districtNames, mobileDistrictSearch]);
+
+  const handleMobileSelectChange = (event: any) => {
+    const rawValue = event.target.value;
+    const nextSelectedDistricts =
+      typeof rawValue === "string" ? rawValue.split(",") : rawValue;
+
+    if (nextSelectedDistricts.length > selectedDistricts.length) {
+      const addedDistrict = nextSelectedDistricts.find(
+        (district: string) => !selectedDistricts.includes(district)
+      );
+
+      if (addedDistrict) {
+        onMapClick(addedDistrict);
+      }
+
+      return;
+    }
+
+    const removedDistrict = selectedDistricts.find(
+      district => !nextSelectedDistricts.includes(district)
+    );
+
+    if (removedDistrict) {
+      onMapClick(removedDistrict);
+    }
+  };
 
   return (
     <PageShell>
@@ -104,6 +161,84 @@ const Dashboard = (props: Props) => {
                 Click districts on the map to filter every metric on the
                 dashboard.
               </ExplorerLead>
+
+              <MobileDistrictFilterCard>
+                <MobileFilterHeader>
+                  <ScopeMeta>Mobile Filter</ScopeMeta>
+                  <MobileFilterTitle>Select Districts</MobileFilterTitle>
+                </MobileFilterHeader>
+                {districtNames.length > 0 ? (
+                  <MobileSelectField variant="outlined">
+                    <Select
+                      multiple
+                      displayEmpty
+                      value={selectedDistricts}
+                      onChange={handleMobileSelectChange}
+                      input={<MobileSelectInput />}
+                      renderValue={(selected: any) => {
+                        const values = selected as Array<string>;
+
+                        return values.length > 0
+                          ? `${values.length} district${
+                              values.length > 1 ? "s" : ""
+                            } selected`
+                          : "Choose one or more districts";
+                      }}
+                      MenuProps={{
+                        getContentAnchorEl: null,
+                        anchorOrigin: {
+                          vertical: "bottom",
+                          horizontal: "left"
+                        },
+                        transformOrigin: {
+                          vertical: "top",
+                          horizontal: "left"
+                        },
+                        PaperProps: {
+                          style: {
+                            maxHeight: 280
+                          }
+                        },
+                        MenuListProps: {
+                          autoFocusItem: false
+                        }
+                      }}
+                      onClose={() => setMobileDistrictSearch("")}
+                      data-test="mobileDistrictDropdown"
+                    >
+                      <ListSubheader disableSticky>
+                        <MobileSearchInput
+                          autoFocus
+                          value={mobileDistrictSearch}
+                          placeholder="Search districts"
+                          onChange={event =>
+                            setMobileDistrictSearch(event.target.value)
+                          }
+                          onClick={event => event.stopPropagation()}
+                          onKeyDown={event => event.stopPropagation()}
+                        />
+                      </ListSubheader>
+                      {filteredDistrictNames.length > 0 ? (
+                        filteredDistrictNames.map(district => (
+                          <MenuItem key={district} value={district}>
+                            <Checkbox
+                              checked={selectedDistricts.includes(district)}
+                              color="primary"
+                            />
+                            <ListItemText primary={district} />
+                          </MenuItem>
+                        ))
+                      ) : (
+                        <MenuItem disabled>No districts match your search</MenuItem>
+                      )}
+                    </Select>
+                  </MobileSelectField>
+                ) : (
+                  <MobileFilterEmpty>
+                    District options are not available yet.
+                  </MobileFilterEmpty>
+                )}
+              </MobileDistrictFilterCard>
 
               <MapCard>
                 <MapHeader>
@@ -397,6 +532,7 @@ type SummaryDatum = {
 
 type Props = {
   cardsData: Array<SummaryDatum>;
+  districts: Array<string>;
   licenseStatusGrapphData: Array<StatusDatum>;
   operationalStatusGraphData: Array<StatusDatum>;
   selectedDistricts: Array<any>;
@@ -472,6 +608,73 @@ const surfaceCardStyles = css`
   border-radius: 28px;
   padding: 24px;
   box-shadow: 0 24px 60px rgba(27, 28, 28, 0.06);
+`;
+
+const MobileDistrictFilterCard = styled.div`
+  ${surfaceCardStyles}
+  display: none;
+
+  @media (max-width: 767px) {
+    display: grid;
+    gap: 14px;
+  }
+`;
+
+const MobileFilterHeader = styled.div`
+  display: grid;
+  gap: 6px;
+`;
+
+const MobileFilterTitle = styled.h3`
+  margin: 0;
+  font-size: 20px;
+  color: #1b1c1c;
+`;
+
+const MobileSelectField = styled(FormControl)`
+  width: 100%;
+`;
+
+const MobileSelectInput = withStyles({
+  root: {
+    width: "100%",
+    minHeight: "48px",
+    borderRadius: "16px",
+    backgroundColor: "#f6f3f2",
+    boxShadow: "inset 0 0 0 1px rgba(0, 49, 120, 0.08)",
+    paddingLeft: "16px",
+    paddingRight: "16px"
+  },
+  input: {
+    padding: "14px 28px 14px 0",
+    fontSize: "15px",
+    fontWeight: 600,
+    color: "rgba(27, 28, 28, 0.86)"
+  }
+})(InputBase);
+
+const MobileSearchInput = styled.input`
+  width: 100%;
+  min-height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #1b1c1c;
+  box-shadow: inset 0 0 0 1px rgba(0, 49, 120, 0.08);
+  outline: none;
+
+  &::placeholder {
+    color: rgba(27, 28, 28, 0.48);
+  }
+`;
+
+const MobileFilterEmpty = styled.p`
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(27, 28, 28, 0.62);
 `;
 
 const ScopeCard = styled.div`
