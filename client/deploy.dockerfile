@@ -1,12 +1,12 @@
-FROM node:14.17.3 as build
+FROM node:22.14.0 AS build
 
 WORKDIR /app
 
-COPY package.json ./
+ENV CYPRESS_INSTALL_BINARY=0
 
-RUN npm install --only=production
+COPY package.json package-lock.json ./
 
-RUN npm install typescript
+RUN npm ci --legacy-peer-deps
 
 COPY ./ ./
 
