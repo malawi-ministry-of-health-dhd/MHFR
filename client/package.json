@@ -39,16 +39,16 @@
     "lodash": "^4.17.11",
     "maplibre-gl": "2.2.1",
     "moment": "^2.24.0",
-    "react": "^16.8.6",
+    "react": "^18.2.0",
     "react-compound-slider": "^1.2.1",
-    "react-dom": "^16.8.6",
+    "react-dom": "^18.2.0",
     "react-ga": "^2.7.0",
     "react-leaflet": "^2.8.0",
     "react-materialize": "^2.6.0",
     "react-redux": "^7.0.3",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^3.4.3",
-    "react-toastify": "^5.2.1",
+    "react-toastify": "^8.1.0",
     "react-tooltip": "^3.10.0",
     "recharts": "^1.6.2",
     "redux": "^4.0.1",
@@ -89,6 +89,26 @@
     ]
   },
   "devDependencies": {
-    "cypress": "^3.8.2"
-  }
+    "@types/axios": "^0.14.0",
+    "@types/classnames": "^2.2.7",
+    "@types/jest": "24.0.13",
+    "@types/node": "12.0.2",
+    "@types/react": "^18.0.21",
+    "@types/react-dom": "^18.0.6",
+    "@types/react-redux": "^7.0.9",
+    "@types/react-router-dom": "^5.1.7",
+    "@types/react-tooltip": "^3.9.2",
+    "@types/recharts": "^1.1.16",
+    "@types/redux": "^3.6.0",
+    "@types/styled-components": "^4.1.15",
+    "@types/sweetalert": "^2.0.4",
+    "@types/yup": "^0.26.13",
+    "cypress": "^3.8.2",
+    "typescript": "^4.8.4"
+  },
+  "resolutions": {
+    "@types/react": "17.0.2",
+    "@types/react-dom": "17.0.2"
+  },
+  "preinstall": "npm install --package-lock-only --ignore-scripts && npx npm-force-resolutions"
 }

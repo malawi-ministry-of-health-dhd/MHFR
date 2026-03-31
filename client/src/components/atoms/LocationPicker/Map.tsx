@@ -3,7 +3,7 @@ import { Map, Marker } from "react-leaflet";
 import OpenFreeMapLayer from "../../atoms/OpenFreeMapLayer";
 import {
   buildOpenStreetMapLocationUrl,
-  defaultMarkerIcon
+  defaultMarkerIcon,
 } from "../../../services/leaflet";
 
 const mapHeight = `57vh`;
@@ -30,7 +30,7 @@ const LocationPickerMap = (props: Props) => {
       style={{
         height: mapHeight,
         overflow: "hidden",
-        position: "relative"
+        position: "relative",
       }}
     >
       <Map
@@ -42,10 +42,10 @@ const LocationPickerMap = (props: Props) => {
         zoomControl
         zoom={6.5}
         style={{ height: mapHeight, width: "100%" }}
-        onclick={event =>
+        onclick={(event) =>
           onLocationClick({
             lat: event.latlng.lat,
-            lng: event.latlng.lng
+            lng: event.latlng.lng,
           })
         }
       >

@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  backend:
+    container_name: mhfr-backend
+    build: ./
+    depends_on:
+      - database
+    ports:
+      - 4000:3000
+    env_file:
+      - ./.docker-compose.env
+
+  client:
+    container_name: mhfr-frontend
+    build:
+      context: ./client/
+      dockerfile: deploy.dockerfile
+    depends_on:
+      - backend
+    ports:
+      - 8888:80
+    env_file:
+      - ./.docker-compose.env
+
+  database:
+    container_name: mhfr-database
+    image: mysql:5.7.30
+    restart: always
+    env_file:
+      - ./.docker-compose.env
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - mhfr_data:/var/lib/mysql
+  # proxy:
+  #   container_name: nginx-proxy
+  #   restart: always
+  #   build:
+  #     context: ./reverse_proxy/
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "443:443"
+
+volumes:
+  mhfr_data:
