@@ -1,100 +1,46 @@
 /// <reference types="Cypress" />
+
 describe("Facility List Spec", () => {
   const FRONTEND_URL = Cypress.env("FRONT_END_URL");
 
   it("Navigates to facility list page", () => {
     cy.visit(`${FRONTEND_URL}/facilities`);
   });
-  it("Shows Facilities Table", () => {
-    cy.get("[class*='MuiTable']")
-      .first()
-      .should("be.visible");
-  });
-  it("Shows Correct table headers", () => {
-    const expectedTableHeaders = [
-      "NEW CODE",
-      "OLD CODE",
-      "NAME",
-      "DISTRICT",
-      "OWNERSHIP",
-      "TYPE",
-      "STATUS",
-      "LATITUDE",
-      "LONGITUDE",
-      "DATE OPENED"
-    ];
-    var tableHeaders = [];
-    cy.get("[class*=MuiTableHead] tr")
-      .first()
-      .find("th")
-      .each((el, index, lis) => {
-        cy.wrap(el)
-          .invoke("text")
-          .then(text => tableHeaders.push(text));
-      })
-      .then(() => {
-        expect(expectedTableHeaders).to.be.members(tableHeaders);
-      });
-  });
-  var facilityIndex;
 
-  it("Shows valid facility data", () => {
-    let rowSelector = "[class*='MuiTable'] tbody [class*=MuiTableRow]";
+  it("Shows the redesigned facility directory layout", () => {
+    cy.contains("National Facility Registry").should("be.visible");
+    cy.contains("Filter Registry").should("be.visible");
+    cy.get("[data-test=advanced_search_container]").should("be.visible");
+    cy.get("[data-test=advanced_search_container] [role=tab]").should(
+      "have.length",
+      4
+    );
+    cy.contains("Regulatory Status").should("be.visible");
+    cy.contains("Last Updated").should("be.visible");
+    cy.get("[data-test=facilityDirectorySearch]").should("be.visible");
+    cy.get("[data-test=facilityDirectoryGrid]").should("be.visible");
+    cy.get("[data-test=facilityDirectoryCard]")
+      .its("length")
+      .should("be.gte", 1)
+      .and("be.lte", 4);
+  });
+
+  it("Shows valid facility data inside a directory card", () => {
     cy.fetch_facilieties_list().then(res => {
-      for (let testCount = 1; testCount <= 3; testCount++) {
-        // get random facility index
-        facilityIndex =
-          res.length >= 10
-            ? Math.floor(Math.random() * 9)
-            : Math.floor(Math.random() * (res.length - 1));
-        //   check code
-        cy.get(rowSelector)
-          .eq(facilityIndex)
-          .find("td")
+      const facility = res[0];
+
+      cy.get("[data-test=facilityDirectoryCard]")
+        .first()
+        .should("contain", facility.code)
+        .and("contain", facility.name)
+        .and("contain", facility.district)
+        .and("contain", facility.ownership)
+        .and("contain", facility.type);
+
+      if (facility.regulatoryStatus) {
+        cy.get("[data-test=facilityDirectoryCard]")
           .first()
-          .should("contain", res[facilityIndex].code);
-
-        // check name
-        cy.get(rowSelector)
-          .eq(facilityIndex)
-          .find("td")
-          .eq(2)
-          .should("contain", res[facilityIndex].name);
-
-        // check ownership
-        cy.get(rowSelector)
-          .eq(facilityIndex)
-          .find("td")
-          .eq(4)
-          .should("contain", res[facilityIndex].ownership);
-
-        // check type
-        cy.get(rowSelector)
-          .eq(facilityIndex)
-          .find("td")
-          .eq(5)
-          .should("contain", res[facilityIndex].type);
-
-        // check status
-        cy.get(rowSelector)
-          .eq(facilityIndex)
-          .find("td")
-          .eq(6)
-          .should("contain", res[facilityIndex].status);
-
-        // check district
-        cy.get(rowSelector)
-          .eq(facilityIndex)
-          .find("td")
-          .eq(3)
-          .should("contain", res[facilityIndex].district);
-
-        // check date opened
-        cy.get(rowSelector)
-          .eq(facilityIndex)
-          .find("td")
-          .eq(9)
-          .should("contain", res[facilityIndex].dateOpened);
+          .should("contain", facility.regulatoryStatus);
       }
     });
   });
