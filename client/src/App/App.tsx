@@ -31,7 +31,7 @@ import { IState } from "../services/types";
 const Slide = cssTransition({
   enter: "slideIn",
   exit: "slideOut",
-  duration: 750
+  collapseDuration: 750,
 });
 const App: React.FC = () => {
   const dispatch = useDispatch();
@@ -50,7 +50,7 @@ const App: React.FC = () => {
       } else {
         fetchUserDetails(
           user.id as any,
-          sessionStorage.getItem("token") as any
+          sessionStorage.getItem("token") as any,
         );
       }
     }
@@ -71,7 +71,7 @@ const App: React.FC = () => {
           top: "0",
           left: "0",
           width: "100vw",
-          padding: "0px"
+          padding: "0px",
         }}
         transition={Slide}
       />
