@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
 import MenuIcon from "@material-ui/icons/Menu";
-import IconButton from "@material-ui/core/IconButton";
 import { withStyles } from "@material-ui/core/styles";
 import styled from "styled-components";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -28,7 +26,6 @@ import SearchContainer from "./SearchContainer";
 import BaselineMenu from "../../molecules/MobileBaselineMenu";
 import ChangePassword from "../../../scenes/Users/ChangePassword";
 import { acActions } from "../../../acl";
-import { changePassword } from "../../../services/api";
 
 library.add(faAlignJustify);
 
@@ -45,16 +42,10 @@ const Header = (props: Props) => {
   } = props;
 
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const [menuItems, setMenuItems] = useState([] as any);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
 
-  useEffect(() => {
-    const menu = auth.authenticated ? adminMenuItems : publicMenuItems;
-    setMenuItems(menu);
-  }, [activePage, auth]);
-
   const isActivePage = (page: string) =>
-    page.toLowerCase() == activePage.toLowerCase();
+    page.toLowerCase() === activePage.toLowerCase();
 
   const adminMenuItems = [
     {
@@ -149,7 +140,8 @@ const Header = (props: Props) => {
     }
   ];
 
-  const mobileMenu = publicMenuItems.filter(m => m.text != "Login");
+  const menuItems = auth.authenticated ? adminMenuItems : publicMenuItems;
+  const mobileMenu = publicMenuItems.filter(m => m.text !== "Login");
 
   const baselineMenu = [
     {
@@ -188,23 +180,24 @@ const Header = (props: Props) => {
         <StyledToolbar>
           <MenuContainer>
             <ToolsContainer>
-              <Logo src="/static/images/logo.png" />
-              <Typography
-                variant="h5"
-                color="inherit"
-                noWrap
-                className="hide-on-small-only"
-              >
-                {`Master Health Facility Registry`.toUpperCase()}
-              </Typography>
-              <Typography
-                variant="h5"
-                color="inherit"
-                noWrap
-                className="hide-on-med-and-up"
-              >
-                {`MHFR`.toUpperCase()}
-              </Typography>
+              <BrandCluster>
+                <LogoFrame>
+                  <Logo
+                    src="/static/images/logo.png"
+                    alt="Master Health Facility Registry"
+                  />
+                </LogoFrame>
+                <BrandLockup className="hide-on-small-only">
+                  <BrandEyebrow>Master</BrandEyebrow>
+                  <BrandTitle>
+                    <span>Health Facility</span>
+                    <BrandTitleAccent>Registry</BrandTitleAccent>
+                  </BrandTitle>
+                </BrandLockup>
+                <MobileBrandBadge className="hide-on-med-and-up">
+                  <span>MHFR</span>
+                </MobileBrandBadge>
+              </BrandCluster>
               <Search onClick={toggleSearch} className="hide-on-med-and-down" />
             </ToolsContainer>
 
@@ -269,15 +262,103 @@ const Container = styled.div`
 const ToolsContainer = styled.div`
   display: flex;
   align-items: center;
+  min-width: 0;
   height: 100%;
 `;
 
-const Logo = styled.img`
-  width: 70px;
-  margin-right: 10px;
+const BrandCluster = styled.div`
+  display: flex;
+  align-items: center;
+  min-width: 0;
+`;
+
+const LogoFrame = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-right: 16px;
+  border-radius: 20px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.24),
+    rgba(255, 255, 255, 0.08)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 28px rgba(3, 19, 50, 0.24);
+  flex-shrink: 0;
+
   @media (max-width: 620px) {
-    width: 50px;
+    width: 48px;
+    height: 48px;
+    margin-right: 10px;
+    border-radius: 16px;
   }
+`;
+
+const Logo = styled.img`
+  width: 50px;
+  @media (max-width: 620px) {
+    width: 36px;
+  }
+`;
+
+const BrandLockup = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+`;
+
+const BrandEyebrow = styled.span`
+  width: fit-content;
+  padding: 5px 10px 4px;
+  margin-bottom: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  line-height: 1;
+  text-transform: uppercase;
+`;
+
+const BrandTitle = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  @media (max-width: 1280px) {
+    font-size: 19px;
+    gap: 8px;
+  }
+`;
+
+const BrandTitleAccent = styled.span`
+  color: #ffd98b;
+`;
+
+const MobileBrandBadge = styled.div`
+  padding: 9px 12px 8px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  line-height: 1;
+  text-transform: uppercase;
+  box-shadow: 0 12px 24px rgba(3, 19, 50, 0.22);
 `;
 
 const MenuContainer = styled.div`
@@ -292,10 +373,11 @@ const MenuContainer = styled.div`
 `;
 const StyledToolbar = withStyles({
   root: {
-    background: "#0d47a1",
+    background: "linear-gradient(118deg, #062b61 0%, #0d47a1 56%, #2676d8 100%)",
     flexGrow: 1,
     height: "80px",
-    fontSize: "18px"
+    fontSize: "18px",
+    boxShadow: "0 10px 28px rgba(4, 24, 61, 0.24)"
   }
 })(Toolbar);
 
