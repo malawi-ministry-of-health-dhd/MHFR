@@ -130,8 +130,8 @@ class index extends Component<any> {
 
     return [
       { name: "Registered", value: registered },
-      { name: "Pending", value: notRegistered },
-      { name: "Not Registered", value: pending }
+      { name: "Pending", value: pending },
+      { name: "Not Registered", value: notRegistered }
     ];
   };
 

@@ -4,7 +4,7 @@ import { Map, Marker, useLeaflet } from "react-leaflet";
 import OpenFreeMapLayer from "../atoms/OpenFreeMapLayer";
 import {
   buildOpenStreetMapLocationUrl,
-  defaultMarkerIcon
+  defaultMarkerIcon,
 } from "../../services/leaflet";
 
 const mapHeight = `57vh`;
@@ -39,14 +39,11 @@ const MarkerViewportOffset = (props: OffsetProps) => {
     const applyOffset = () => {
       const markerLatLng = L.latLng(Number(position.lat), Number(position.lng));
       const mapSize = map.getSize();
-      const shiftX = Math.max(
-        0,
-        rightInset + markerPadding - mapSize.x / 2
-      );
+      const shiftX = Math.max(0, rightInset + markerPadding - mapSize.x / 2);
       const projectedMarker = map.project(markerLatLng, map.getZoom());
       const adjustedCenter = map.unproject(
         L.point(projectedMarker.x + shiftX, projectedMarker.y),
-        map.getZoom()
+        map.getZoom(),
       );
 
       map.setView(adjustedCenter, map.getZoom(), { animate: false });
@@ -79,7 +76,7 @@ const FacilityGoogleMap = (props: Props) => {
       style={{
         height: mapHeight,
         overflow: "hidden",
-        position: "relative"
+        position: "relative",
       }}
     >
       <Map
@@ -96,10 +93,7 @@ const FacilityGoogleMap = (props: Props) => {
         <MarkerViewportOffset position={position} rightInset={rightInset} />
         <OpenFreeMapLayer />
         {isMarkerShown && (
-          <Marker
-            icon={defaultMarkerIcon}
-            position={markerPosition as any}
-          />
+          <Marker icon={defaultMarkerIcon} position={markerPosition as any} />
         )}
       </Map>
       <a
