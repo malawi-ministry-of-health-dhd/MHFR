@@ -130,8 +130,8 @@ class index extends Component<any> {
 
     return [
       { name: "Registered", value: registered },
-      { name: "Pending", value: notRegistered },
-      { name: "Not Registered", value: pending }
+      { name: "Pending", value: pending },
+      { name: "Not Registered", value: notRegistered }
     ];
   };
 
@@ -205,6 +205,7 @@ class index extends Component<any> {
     return (
       <Dashboard
         cardsData={this.getFacilitiesByTypeData()}
+        districts={this.props.districts.map((district: any) => district.district_name)}
         licenseStatusGrapphData={this.getRegulatoryBarData()}
         operationalStatusGraphData={this.getOperationalBarData()}
         selectedDistricts={this.state.districtsFilter}

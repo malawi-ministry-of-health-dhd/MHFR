@@ -18,7 +18,10 @@ export class index extends Component<Props> {
   }
 
   onClick = (location: any) => {
-    const position = { lat: location.latLng.lat(), lng: location.latLng.lng() };
+    const position =
+      location && location.latLng
+        ? { lat: location.latLng.lat(), lng: location.latLng.lng() }
+        : { lat: location.lat, lng: location.lng };
     this.setState({ position });
     this.props.onChange(position);
   };

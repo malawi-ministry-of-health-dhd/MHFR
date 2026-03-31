@@ -5,18 +5,15 @@ import {
   Table,
   TableHeaderRow,
   PagingPanel,
-  TableFilterRow,
   Toolbar,
-  SearchPanel
+  SearchPanel,
 } from "@devexpress/dx-react-grid-material-ui";
 import {
   SortingState,
   IntegratedSorting,
   PagingState,
   IntegratedPaging,
-  FilteringState,
-  IntegratedFiltering,
-  SearchState
+  SearchState,
 } from "@devexpress/dx-react-grid";
 import { withStyles } from "@material-ui/core";
 import { fade } from "@material-ui/core/styles/colorManipulator";
@@ -25,30 +22,63 @@ const TableComponentBase = ({ classes, ...restProps }: any) => (
   <Table.Table {...restProps} className={classes.tableStriped} />
 );
 
+const buildSearchableText = (value: any): string => {
+  if (value == null) {
+    return "";
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(buildSearchableText).join(" ");
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value).map(buildSearchableText).join(" ");
+  }
+
+  return String(value);
+};
+
 function FacilityTable(props: Props) {
   const { defaultSorting, pageSize, onSelected, data, columns } = props;
+  const [searchValue, setSearchValue] = React.useState("");
+  const searchableColumns = React.useMemo(
+    () => Array.from(new Set(columns.map((column) => column.name))),
+    [columns],
+  );
+  const searchedRows = React.useMemo(() => {
+    const normalizedSearch = searchValue.trim().toLowerCase();
+
+    if (normalizedSearch.length === 0) {
+      return data;
+    }
+
+    return data.filter((row: any) =>
+      searchableColumns.some((columnName) =>
+        buildSearchableText(row[columnName])
+          .toLowerCase()
+          .includes(normalizedSearch),
+      ),
+    );
+  }, [data, searchableColumns, searchValue]);
 
   const TableRow = ({ row, ...restProps }: any) => (
     <Table.Row
       {...restProps}
       onClick={() => onSelected(row)}
       style={{
-        cursor: "pointer"
+        cursor: "pointer",
       }}
     />
   );
 
   return (
     <div className="table">
-    
-      <Grid rows={data} columns={columns}>
+      <Grid rows={searchedRows} columns={columns}>
+        <SearchState value={searchValue} onValueChange={setSearchValue} />
         <SortingState defaultSorting={defaultSorting} />
         <IntegratedSorting />
         <PagingState defaultCurrentPage={0} pageSize={pageSize} />
         <IntegratedPaging />
-        <FilteringState defaultFilters={[]} />
-        <SearchState />
-        <IntegratedFiltering />
         <Table tableComponent={StyledTable} rowComponent={TableRow} />
         <TableHeaderRow showSortingControls />
         <Toolbar />
@@ -71,21 +101,21 @@ type Props = {
 const StyledTable = withStyles({
   tableStriped: {
     "& tbody tr:nth-of-type(odd)": {
-      backgroundColor: fade("#f1f1f1", 1)
+      backgroundColor: fade("#f1f1f1", 1),
     },
     "& thead tr": {
       backgroundColor: fade("#375a8c", 1),
-      color: fade("#ffffff", 1)
+      color: fade("#ffffff", 1),
     },
     "& thead tr th": {
       color: fade("#ffffff", 1),
-      borderRadius: "0px"
+      borderRadius: "0px",
     },
     "& thead tr th span:hover": {
-      color: fade("#f1f1f1", 1)
+      color: fade("#f1f1f1", 1),
     },
     "& thead tr th span:focus": {
-      color: fade("#f1f1f1", 1)
-    }
-  }
+      color: fade("#f1f1f1", 1),
+    },
+  },
 })(TableComponentBase);

@@ -31,7 +31,7 @@ import { IState } from "../services/types";
 const Slide = cssTransition({
   enter: "slideIn",
   exit: "slideOut",
-  collapseDuration: 750
+  duration: 750
 });
 const App: React.FC = () => {
   const dispatch = useDispatch();

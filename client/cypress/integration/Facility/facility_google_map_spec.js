@@ -34,16 +34,20 @@ describe("Tests Facility Contacts Page", () => {
       const location =
         locationDetails.body.geolocations &&
         locationDetails.body.geolocations.latitude !== ""
-          ? `${parseFloat(
-              locationDetails.body.geolocations.latitude
-            )},${parseFloat(locationDetails.body.geolocations.longitude)}`
-          : "-13.962612,33.774119";
+          ? {
+              lat: parseFloat(locationDetails.body.geolocations.latitude),
+              lng: parseFloat(locationDetails.body.geolocations.longitude)
+            }
+          : { lat: -13.962612, lng: 33.774119 };
       cy.wait(60 * 60);
 
       cy.get("div[test-id='fgooglemap'] a")
         .first()
         .invoke("attr", "href")
-        .should("contain", `${location}`);
+        .should(
+          "equal",
+          `https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}#map=15/${location.lat}/${location.lng}`
+        );
     });
   });
 });

@@ -27,12 +27,15 @@ const FilterDrawer = (props: Props) => {
   );
 };
 
-type Props = {
-  classes?: any;
+type OwnProps = {
   open: boolean;
+  onAddFilter: Function;
+};
+
+type Props = OwnProps & {
+  classes?: any;
   dependancies?: any;
   filterOptions?: any;
-  onAddFilter: Function;
 };
 const styles: any = (theme: any) => ({
   root: {
@@ -66,7 +69,9 @@ const mapStateToProps = (state: any) => ({
   filterOptions: state.facilities.advancedFilter.filterValues
 });
 
-export default connect(
+const ConnectedFilterDrawer = connect(
   mapStateToProps,
   null
 )(withStyles(styles, { withTheme: true })(FilterDrawer));
+
+export default ConnectedFilterDrawer as React.ComponentType<OwnProps>;

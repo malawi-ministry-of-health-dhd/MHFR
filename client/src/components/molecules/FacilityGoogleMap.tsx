@@ -1,55 +1,13 @@
 import React from "react";
-// @ts-ignore
-import { compose, withProps, withHandlers } from "recompose";
+import L from "leaflet";
+import { Map, Marker, useLeaflet } from "react-leaflet";
+import OpenFreeMapLayer from "../atoms/OpenFreeMapLayer";
 import {
-  withScriptjs,
-  withGoogleMap,
-  GoogleMap,
-  Marker
-} from "react-google-maps";
+  buildOpenStreetMapLocationUrl,
+  defaultMarkerIcon,
+} from "../../services/leaflet";
 
-const MFLGoogleMapBg = compose(
-  withProps({
-    googleMapURL:
-      "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-MrJ0WnBYzAA1A2SwzyCX4UTnDi-fjw8&v=3.exp&libraries=geometry,drawing,places",
-    loadingElement: (
-      <div
-        style={{
-          minHeight: `57vh`
-        }}
-      />
-    ),
-    containerElement: (
-      <div
-        test-id="fgooglemap"
-        style={{
-          height: `57vh`,
-          overflow: "hidden"
-        }}
-      />
-    ),
-    mapElement: (
-      <div
-        style={{
-          height: `100%`
-        }}
-      />
-    )
-  }),
-  withScriptjs,
-  withGoogleMap
-)((props: Props) => {
-  const { position, isMarkerShown } = props;
-  return (
-    //@ts-ignore
-    <GoogleMap
-      defaultZoom={15}
-      defaultCenter={{ lat: position.lat, lng: position.lng + 0.016 }}
-    >
-      {isMarkerShown && <Marker position={position} />}
-    </GoogleMap>
-  );
-});
+const mapHeight = `57vh`;
 
 type Props = {
   position: {
@@ -57,5 +15,97 @@ type Props = {
     lng: any;
   };
   isMarkerShown?: boolean;
+  rightInset?: number;
 };
-export default MFLGoogleMapBg;
+
+type OffsetProps = {
+  position: {
+    lat: any;
+    lng: any;
+  };
+  rightInset: number;
+  markerPadding?: number;
+};
+
+const MarkerViewportOffset = (props: OffsetProps) => {
+  const { map } = useLeaflet();
+  const { position, rightInset, markerPadding = 40 } = props;
+
+  React.useEffect(() => {
+    if (!map) {
+      return;
+    }
+
+    const applyOffset = () => {
+      const markerLatLng = L.latLng(Number(position.lat), Number(position.lng));
+      const mapSize = map.getSize();
+      const shiftX = Math.max(0, rightInset + markerPadding - mapSize.x / 2);
+      const projectedMarker = map.project(markerLatLng, map.getZoom());
+      const adjustedCenter = map.unproject(
+        L.point(projectedMarker.x + shiftX, projectedMarker.y),
+        map.getZoom(),
+      );
+
+      map.setView(adjustedCenter, map.getZoom(), { animate: false });
+    };
+
+    applyOffset();
+    map.on("zoomend", applyOffset);
+    map.on("resize", applyOffset);
+
+    return () => {
+      map.off("zoomend", applyOffset);
+      map.off("resize", applyOffset);
+    };
+  }, [map, markerPadding, position.lat, position.lng, rightInset]);
+
+  return null;
+};
+
+const FacilityGoogleMap = (props: Props) => {
+  const { position, isMarkerShown, rightInset = 0 } = props;
+  const latitude = Number(position.lat);
+  const longitude = Number(position.lng);
+  const center = [latitude, longitude];
+  const markerPosition = [latitude, longitude];
+
+  return (
+    <div
+      className="mhfr-map-shell mhfr-map-shell--facility"
+      test-id="fgooglemap"
+      style={{
+        height: mapHeight,
+        overflow: "hidden",
+        position: "relative",
+      }}
+    >
+      <Map
+        attributionControl
+        center={center as any}
+        className="mhfr-map"
+        maxZoom={20}
+        minZoom={1}
+        zoomControl
+        zoom={17}
+        scrollWheelZoom={false}
+        style={{ height: mapHeight, width: "100%" }}
+      >
+        <MarkerViewportOffset position={position} rightInset={rightInset} />
+        <OpenFreeMapLayer />
+        {isMarkerShown && (
+          <Marker icon={defaultMarkerIcon} position={markerPosition as any} />
+        )}
+      </Map>
+      <a
+        className="mhfr-map-action"
+        href={buildOpenStreetMapLocationUrl(position, 17)}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View larger map
+      </a>
+    </div>
+  );
+};
+
+export default FacilityGoogleMap;

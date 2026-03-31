@@ -1,4 +1,79 @@
+import moment from "moment";
 import { IFilterValues } from "../../services/types";
+
+export const getLastUpdatedRanges = () => {
+  const dateFormat = "MMM YYYY";
+  const rangeDateFormat = "YYYY-MM";
+
+  return [
+    {
+      id: 0,
+      type: "lastUpdatedRange",
+      label: `${moment()
+        .subtract(4, "months")
+        .format(dateFormat)} - ${moment().format(dateFormat)}`,
+      values: [
+        moment()
+          .subtract(4, "months")
+          .format(rangeDateFormat),
+        moment()
+          .add(1, "months")
+          .format(rangeDateFormat)
+      ],
+      range: true
+    },
+    {
+      id: 1,
+      type: "lastUpdatedRange",
+      label: `${moment()
+        .subtract(8, "months")
+        .format(dateFormat)} - ${moment()
+        .subtract(5, "months")
+        .format(dateFormat)}`,
+      values: [
+        moment()
+          .subtract(8, "months")
+          .format(rangeDateFormat),
+        moment()
+          .subtract(4, "months")
+          .format(rangeDateFormat)
+      ],
+      range: true
+    },
+    {
+      id: 2,
+      type: "lastUpdatedRange",
+      label: `${moment()
+        .subtract(12, "months")
+        .format(dateFormat)} - ${moment()
+        .subtract(9, "months")
+        .format(dateFormat)}`,
+      values: [
+        moment()
+          .subtract(12, "months")
+          .format(rangeDateFormat),
+        moment()
+          .subtract(8, "months")
+          .format(rangeDateFormat)
+      ],
+      range: true
+    },
+    {
+      id: 4,
+      type: "lastUpdatedRange",
+      label: `< ${moment()
+        .subtract(13, "months")
+        .format(dateFormat)}`,
+      values: [
+        moment("1970-01").format(rangeDateFormat),
+        moment()
+          .subtract(12, "months")
+          .format(rangeDateFormat)
+      ],
+      range: true
+    }
+  ] as Array<IFilterValues>;
+};
 
 export const getAdvancedBasicFilter = (filterValues: Array<IFilterValues>) => {
   const districtsFilterOpt = filterValues
