@@ -3,6 +3,8 @@ import React from "react";
 import styled, { css } from "styled-components";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ViewModuleOutlined from "@material-ui/icons/ViewModuleOutlined";
+import TableChartOutlined from "@material-ui/icons/TableChartOutlined";
 import {
   faPlus,
   faPrint,
@@ -15,10 +17,28 @@ import Ac from "../atoms/Ac";
 library.add(faPlus, faPrint, faDownload);
 
 function FacilityToolbar(props: Props) {
-  const { downloadList, facilityIds } = props;
+  const { downloadList, facilityIds, viewMode, onViewModeChange } = props;
 
   return (
     <ActionsGroup>
+      <LayoutToggle data-test="facilityLayoutToggle">
+        <LayoutToggleButton
+          type="button"
+          $active={viewMode === "cards"}
+          onClick={() => onViewModeChange("cards")}
+        >
+          <ViewModuleOutlined fontSize="small" />
+          <span>Cards</span>
+        </LayoutToggleButton>
+        <LayoutToggleButton
+          type="button"
+          $active={viewMode === "table"}
+          onClick={() => onViewModeChange("table")}
+        >
+          <TableChartOutlined fontSize="small" />
+          <span>Table</span>
+        </LayoutToggleButton>
+      </LayoutToggle>
       <ActionButton
         type="button"
         tone="surface"
@@ -39,7 +59,7 @@ function FacilityToolbar(props: Props) {
         <ActionIcon>
           <FontAwesomeIcon icon={faPrint} />
         </ActionIcon>
-        <span>Print List</span>
+        <span>Download PDF</span>
       </ActionButton>
       {isLoggedIn() && (
         <Ac
@@ -62,6 +82,8 @@ function FacilityToolbar(props: Props) {
 type Props = {
   downloadList: Function;
   facilityIds?: Array<number>;
+  viewMode: "cards" | "table";
+  onViewModeChange: (mode: "cards" | "table") => void;
 };
 
 export default FacilityToolbar;
@@ -119,6 +141,36 @@ const ActionsGroup = styled.div`
   @media (max-width: 992px) {
     width: 100%;
   }
+`;
+
+const LayoutToggle = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: #edf0f4;
+  box-shadow: inset 0 0 0 1px rgba(204, 213, 225, 0.75);
+`;
+
+const LayoutToggleButton = styled.button<{ $active: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: ${props => (props.$active ? "#ffffff" : "transparent")};
+  color: ${props => (props.$active ? "#003178" : "#607089")};
+  box-shadow: ${props =>
+    props.$active ? "0 8px 16px rgba(0, 49, 120, 0.08)" : "none"};
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease,
+    box-shadow 0.18s ease;
 `;
 
 const ActionButton = styled.button`

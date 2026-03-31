@@ -28,11 +28,11 @@ const Facilities = (props: Props) => {
     filterOptions,
     downloadList,
     isLoading,
-    totalFacilitiesCount,
     dependancies
   } = props;
 
   const [searchValue, setSearchValue] = useState("");
+  const [layoutMode, setLayoutMode] = useState<"cards" | "table">("cards");
   const selectedDistrict = useMemo(
     () => getSingleFilterOption(filterOptions, "districts"),
     [filterOptions]
@@ -119,7 +119,6 @@ const Facilities = (props: Props) => {
               <SidebarColumn>
                 <FacilityDirectorySidebar
                   dependancies={dependancies}
-                  totalFacilitiesCount={totalFacilitiesCount}
                   filterOptions={filterOptions}
                   onAddFilter={onAddFilter}
                 />
@@ -134,6 +133,8 @@ const Facilities = (props: Props) => {
                   <FacilityToolBar
                     downloadList={downloadList}
                     facilityIds={visibleFacilityIds}
+                    viewMode={layoutMode}
+                    onViewModeChange={setLayoutMode}
                   />
                 </HeaderRow>
 
@@ -166,7 +167,11 @@ const Facilities = (props: Props) => {
                     <Loader style={{ height: "50vh" }} />
                   </LoaderShell>
                 ) : (
-                  <FacilityList onSelect={onFacilityClicked} data={visibleFacilities} />
+                  <FacilityList
+                    onSelect={onFacilityClicked}
+                    data={visibleFacilities}
+                    layoutMode={layoutMode}
+                  />
                 )}
               </MainColumn>
             </DesktopShell>
@@ -199,7 +204,11 @@ const Facilities = (props: Props) => {
           {isLoading ? (
             <Loader style={{ height: "50vh" }} />
           ) : (
-            <FacilityList onSelect={onFacilityClicked} data={facilities} />
+            <FacilityList
+              onSelect={onFacilityClicked}
+              data={facilities}
+              layoutMode={layoutMode}
+            />
           )}
         </Container>
       </MobileView>

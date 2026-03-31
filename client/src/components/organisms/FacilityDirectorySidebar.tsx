@@ -1,11 +1,9 @@
 import React from "react";
 import styled from "styled-components";
-import FavoriteBorderOutlined from "@material-ui/icons/FavoriteBorderOutlined";
 import SearchTabs from "./FacilityFilter/SearchTabs";
 
 function FacilityDirectorySidebar(props: Props) {
-  const { dependancies, totalFacilitiesCount, filterOptions, onAddFilter } = props;
-  const districts = dependancies?.districts?.list || [];
+  const { dependancies, filterOptions, onAddFilter } = props;
 
   return (
     <SidebarStack>
@@ -19,18 +17,6 @@ function FacilityDirectorySidebar(props: Props) {
           />
         </TabsShell>
       </FilterPanel>
-
-      <StatsCard>
-        <StatsEyebrow>Live Statistics</StatsEyebrow>
-        <StatsValue>{totalFacilitiesCount.toLocaleString()}</StatsValue>
-        <StatsCopy>
-          Total verified health facilities across {districts.length} districts in
-          Malawi.
-        </StatsCopy>
-        <StatsIconWrap>
-          <FavoriteBorderOutlined fontSize="inherit" />
-        </StatsIconWrap>
-      </StatsCard>
     </SidebarStack>
   );
 }
@@ -39,7 +25,6 @@ export default FacilityDirectorySidebar;
 
 type Props = {
   dependancies: any;
-  totalFacilitiesCount: number;
   filterOptions: Array<any>;
   onAddFilter: Function;
 };
@@ -71,48 +56,4 @@ const TabsShell = styled.div`
   .MuiTabs-root {
     background: #ffffff;
   }
-`;
-
-const StatsCard = styled.div`
-  position: relative;
-  margin-top: 18px;
-  padding: 20px 18px 22px;
-  border-radius: 22px;
-  background: linear-gradient(145deg, #075d50 0%, #0b6f61 100%);
-  color: #dff6f1;
-  overflow: hidden;
-`;
-
-const StatsEyebrow = styled.div`
-  margin-bottom: 10px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  line-height: 1;
-  text-transform: uppercase;
-  opacity: 0.8;
-`;
-
-const StatsValue = styled.div`
-  margin-bottom: 10px;
-  font-family: "Public Sans", "Roboto", sans-serif;
-  font-size: 40px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.04em;
-`;
-
-const StatsCopy = styled.p`
-  max-width: 230px;
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.65;
-`;
-
-const StatsIconWrap = styled.div`
-  position: absolute;
-  right: -6px;
-  bottom: -8px;
-  color: rgba(223, 246, 241, 0.12);
-  font-size: 96px;
 `;

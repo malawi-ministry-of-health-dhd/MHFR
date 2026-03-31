@@ -11,20 +11,20 @@ import VerifiedUserOutlined from "@material-ui/icons/VerifiedUserOutlined";
 import MobileFacilityList from "../../molecules/FacilityMobileList";
 
 function FacilityList(props: Props) {
-  const { onSelect, className, data } = props;
+  const { onSelect, className, data, layoutMode = "cards" } = props;
   const [page, setPage] = useState(1);
-  const pageSize = 4;
+  const pageSize = layoutMode === "table" ? 10 : 4;
 
   useEffect(() => {
     setPage(1);
-  }, [data]);
+  }, [data, layoutMode]);
 
   const totalPages = Math.max(1, Math.ceil(data.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const pagedFacilities = useMemo(
     () =>
       data.slice((currentPage - 1) * pageSize, (currentPage - 1) * pageSize + pageSize),
-    [currentPage, data]
+    [currentPage, data, pageSize]
   );
 
   const paginationItems = useMemo(() => {
@@ -46,92 +46,162 @@ function FacilityList(props: Props) {
   return (
     <>
       <DesktopListShell className={`${className} hide-on-med-and-down`}>
-        <DesktopGrid data-test="facilityDirectoryGrid">
-          {pagedFacilities.length > 0 ? (
-            pagedFacilities.map((facility: any) => {
-              const isFunctional =
-                String(facility.status || "").toLowerCase() === "functional";
-              const footerText = isFunctional
-                ? facility.dateOpened
-                  ? `Opened ${facility.dateOpened}`
-                  : facility.regulatoryStatus || "Operationally active"
-                : facility.status || "Operational review needed";
-
-              return (
-                <FacilityCardButton
-                  key={facility.id}
-                  type="button"
-                  data-test="facilityDirectoryCard"
-                  onClick={() => onSelect(facility.id)}
-                >
-                  <FacilityCardChrome>
-                    <FacilityCardBody>
-                      <CardHeader>
+        {pagedFacilities.length > 0 ? (
+          layoutMode === "table" ? (
+            <TableShell data-test="facilityDirectoryTable">
+              <TableElement>
+                <thead>
+                  <tr>
+                    <TableHeadCell>Code</TableHeadCell>
+                    <TableHeadCell>Facility</TableHeadCell>
+                    <TableHeadCell>District</TableHeadCell>
+                    <TableHeadCell>Type</TableHeadCell>
+                    <TableHeadCell>Ownership</TableHeadCell>
+                    <TableHeadCell>Regulatory</TableHeadCell>
+                    <TableHeadCell>Status</TableHeadCell>
+                    <TableHeadCell align="right">Action</TableHeadCell>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagedFacilities.map((facility: any) => (
+                    <TableRow
+                      data-test="facilityDirectoryTableRow"
+                      key={facility.id}
+                      onClick={() => onSelect(facility.id)}
+                      onKeyDown={event => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          onSelect(facility.id);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <TableBodyCell>
                         <CodeTag>Code: {facility.code || "Not available"}</CodeTag>
+                      </TableBodyCell>
+                      <TableBodyCell>
+                        <FacilityNameCell>
+                          <FacilityName>{facility.name || "Unnamed facility"}</FacilityName>
+                          {facility.common && facility.common !== facility.name && (
+                            <FacilityMeta>{facility.common}</FacilityMeta>
+                          )}
+                        </FacilityNameCell>
+                      </TableBodyCell>
+                      <TableBodyCell>
+                        {facility.district || "District not available"}
+                      </TableBodyCell>
+                      <TableBodyCell>{facility.type || "Not available"}</TableBodyCell>
+                      <TableBodyCell>
+                        {facility.ownership || "Not available"}
+                      </TableBodyCell>
+                      <TableBodyCell>
+                        {facility.regulatoryStatus || "Not available"}
+                      </TableBodyCell>
+                      <TableBodyCell>
                         <StatusTag $status={facility.status}>
                           <StatusDot $status={facility.status} />
                           <span>{facility.status || "Unknown"}</span>
                         </StatusTag>
-                      </CardHeader>
-
-                      <CardTitle>{facility.name || "Unnamed facility"}</CardTitle>
-                      <CardLocation>
-                        <LocationOnOutlined fontSize="small" />
-                        <span>{facility.district || "District not available"}</span>
-                      </CardLocation>
-
-                      <InfoGrid>
-                        <InfoCard>
-                          <InfoLabel>Type</InfoLabel>
-                          <InfoValue>{facility.type || "Not available"}</InfoValue>
-                        </InfoCard>
-                        <InfoCard>
-                          <InfoLabel>Ownership</InfoLabel>
-                          <InfoValue>
-                            {facility.ownership || "Not available"}
-                          </InfoValue>
-                        </InfoCard>
-                        <InfoCard>
-                          <InfoLabel>Regulatory</InfoLabel>
-                          <InfoValue>
-                            {facility.regulatoryStatus || "Not available"}
-                          </InfoValue>
-                        </InfoCard>
-                      </InfoGrid>
-
-                      <CardFooter>
-                        <FooterMeta $positive={isFunctional}>
-                          {isFunctional ? (
-                            facility.regulatoryStatus ? (
-                              <VerifiedUserOutlined fontSize="small" />
-                            ) : (
-                              <EventAvailableOutlined fontSize="small" />
-                            )
-                          ) : (
-                            <WarningRounded fontSize="small" />
-                          )}
-                          <span>{footerText}</span>
-                        </FooterMeta>
-                        <DetailLink>
-                          View Details
+                      </TableBodyCell>
+                      <TableBodyCell align="right">
+                        <TableDetailLink>
+                          View
                           <ArrowForward fontSize="small" />
-                        </DetailLink>
-                      </CardFooter>
-                    </FacilityCardBody>
-                  </FacilityCardChrome>
-                </FacilityCardButton>
-              );
-            })
+                        </TableDetailLink>
+                      </TableBodyCell>
+                    </TableRow>
+                  ))}
+                </tbody>
+              </TableElement>
+            </TableShell>
           ) : (
-            <EmptyCard>
-              <EmptyTitle>No facilities found</EmptyTitle>
-              <EmptyCopy>
-                Try broadening your filters or searching with a different facility
-                name or code.
-              </EmptyCopy>
-            </EmptyCard>
-          )}
-        </DesktopGrid>
+            <DesktopGrid data-test="facilityDirectoryGrid">
+              {pagedFacilities.map((facility: any) => {
+                const isFunctional =
+                  String(facility.status || "").toLowerCase() === "functional";
+                const footerText = isFunctional
+                  ? facility.dateOpened
+                    ? `Opened ${facility.dateOpened}`
+                    : facility.regulatoryStatus || "Operationally active"
+                  : facility.status || "Operational review needed";
+
+                return (
+                  <FacilityCardButton
+                    key={facility.id}
+                    type="button"
+                    data-test="facilityDirectoryCard"
+                    onClick={() => onSelect(facility.id)}
+                  >
+                    <FacilityCardChrome>
+                      <FacilityCardBody>
+                        <CardHeader>
+                          <CodeTag>Code: {facility.code || "Not available"}</CodeTag>
+                          <StatusTag $status={facility.status}>
+                            <StatusDot $status={facility.status} />
+                            <span>{facility.status || "Unknown"}</span>
+                          </StatusTag>
+                        </CardHeader>
+
+                        <CardTitle>{facility.name || "Unnamed facility"}</CardTitle>
+                        <CardLocation>
+                          <LocationOnOutlined fontSize="small" />
+                          <span>{facility.district || "District not available"}</span>
+                        </CardLocation>
+
+                        <InfoGrid>
+                          <InfoCard>
+                            <InfoLabel>Type</InfoLabel>
+                            <InfoValue>{facility.type || "Not available"}</InfoValue>
+                          </InfoCard>
+                          <InfoCard>
+                            <InfoLabel>Ownership</InfoLabel>
+                            <InfoValue>
+                              {facility.ownership || "Not available"}
+                            </InfoValue>
+                          </InfoCard>
+                          <InfoCard>
+                            <InfoLabel>Regulatory</InfoLabel>
+                            <InfoValue>
+                              {facility.regulatoryStatus || "Not available"}
+                            </InfoValue>
+                          </InfoCard>
+                        </InfoGrid>
+
+                        <CardFooter>
+                          <FooterMeta $positive={isFunctional}>
+                            {isFunctional ? (
+                              facility.regulatoryStatus ? (
+                                <VerifiedUserOutlined fontSize="small" />
+                              ) : (
+                                <EventAvailableOutlined fontSize="small" />
+                              )
+                            ) : (
+                              <WarningRounded fontSize="small" />
+                            )}
+                            <span>{footerText}</span>
+                          </FooterMeta>
+                          <DetailLink>
+                            View Details
+                            <ArrowForward fontSize="small" />
+                          </DetailLink>
+                        </CardFooter>
+                      </FacilityCardBody>
+                    </FacilityCardChrome>
+                  </FacilityCardButton>
+                );
+              })}
+            </DesktopGrid>
+          )
+        ) : (
+          <EmptyCard>
+            <EmptyTitle>No facilities found</EmptyTitle>
+            <EmptyCopy>
+              Try broadening your filters or searching with a different facility
+              name or code.
+            </EmptyCopy>
+          </EmptyCard>
+        )}
         {data.length > pageSize && (
           <PaginationBar>
             <PagerButton
@@ -182,6 +252,7 @@ type Props = {
   onSelect: Function;
   data: Array<any>;
   className?: string;
+  layoutMode?: "cards" | "table";
 };
 
 const getStatusColors = (status: string) => {
@@ -218,6 +289,83 @@ const DesktopGrid = styled.div`
 
 const DesktopListShell = styled.div`
   width: 100%;
+`;
+
+const TableShell = styled.div`
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(0, 49, 120, 0.06);
+`;
+
+const TableElement = styled.table`
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+`;
+
+const TableHeadCell = styled.th<{ align?: "left" | "right" }>`
+  padding: 18px 18px 16px;
+  border-bottom: 1px solid #edf1f6;
+  color: #7a879a;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-align: ${props => props.align || "left"};
+  text-transform: uppercase;
+  white-space: nowrap;
+`;
+
+const TableRow = styled.tr`
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+
+  &:hover {
+    background: #f9fbfd;
+  }
+`;
+
+const TableBodyCell = styled.td<{ align?: "left" | "right" }>`
+  padding: 18px;
+  border-bottom: 1px solid #f1f4f8;
+  color: #24344d;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: ${props => props.align || "left"};
+  vertical-align: middle;
+`;
+
+const FacilityNameCell = styled.div`
+  min-width: 220px;
+`;
+
+const FacilityName = styled.div`
+  color: #003178;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.3;
+`;
+
+const FacilityMeta = styled.div`
+  margin-top: 4px;
+  color: #7a879a;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+`;
+
+const TableDetailLink = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  color: #003178;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
 `;
 
 const FacilityCardButton = styled.button`
