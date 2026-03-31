@@ -94,11 +94,6 @@ const Dashboard = (props: Props) => {
           selectedDistricts.length > 1 ? "s" : ""
         } selected`
       : "National registry view";
-  const today = new Date().toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
-  });
   const districtNames = useMemo(
     () =>
       districts
@@ -298,7 +293,6 @@ const Dashboard = (props: Props) => {
                 </div>
                 <HeroMetaGroup>
                   <MetaPill>{scopeLabel}</MetaPill>
-                  <MetaPill>Viewed {today}</MetaPill>
                 </HeroMetaGroup>
               </HeroHeader>
 
