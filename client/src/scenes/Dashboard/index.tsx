@@ -3,25 +3,26 @@ import Dashboard from "./Dashboard";
 import { connect } from "react-redux";
 import {
   removeAllFilterValue,
-  addFilterValue
+  addFilterValue,
 } from "../../services/redux/actions/facilities";
 import { setActivePage } from "../../services/redux/actions/ui";
 
 class index extends Component<any> {
   initialState: Array<string> = [];
   state = {
-    districtsFilter: this.initialState
+    districtsFilter: this.initialState,
   };
 
   getFilteredFacilities = () =>
     this.state.districtsFilter.length == 0
       ? this.props.facilities
       : this.props.facilities.filter((facility: any) =>
-          this.inFilter(facility.district)
+          this.inFilter(facility.district),
         );
 
-  inFilter = (district: string) =>
-    this.state.districtsFilter.includes(district);
+  inFilter = (district: string) => {
+    return this.state.districtsFilter.includes(district);
+  };
 
   handleFilterAdd = (district: string) => {
     let districts: Array<string> = this.state.districtsFilter;
@@ -32,7 +33,7 @@ class index extends Component<any> {
   handleFilterRem = (district: string) => {
     let districts = this.state.districtsFilter;
     this.setState({
-      districtsFilter: districts.filter(dis => dis != district)
+      districtsFilter: districts.filter((dis) => dis != district),
     });
   };
 
@@ -47,7 +48,7 @@ class index extends Component<any> {
   getFacilitiesOfType = (type: string) => {
     return this.getFilteredFacilities()
       ? this.getFilteredFacilities().filter(
-          (facility: any) => facility.type.toLowerCase() == type.toLowerCase()
+          (facility: any) => facility.type.toLowerCase() == type.toLowerCase(),
         ).length
       : 0;
   };
@@ -55,7 +56,7 @@ class index extends Component<any> {
   generateBarChartData = (
     comparisonModel: any,
     comparisonField: any,
-    facilityField: any
+    facilityField: any,
   ) => {
     const data = this.getFilteredFacilities();
     if (data) {
@@ -63,8 +64,9 @@ class index extends Component<any> {
         return {
           name: model[comparisonField],
           count: data.filter(
-            (facility: any) => facility[facilityField] == model[comparisonField]
-          ).length
+            (facility: any) =>
+              facility[facilityField] == model[comparisonField],
+          ).length,
         };
       });
     }
@@ -81,17 +83,17 @@ class index extends Component<any> {
             .map((ft: any) => ({
               type: "facilityTypes",
               id: ft.id,
-              label: ft.facility_type
+              label: ft.facility_type,
             }))[0]
         : "All";
 
-    let districts: Array<any> = this.state.districtsFilter.map(dis => {
+    let districts: Array<any> = this.state.districtsFilter.map((dis) => {
       return this.props.districts
         .filter((d: any) => d.district_name === dis)
         .map((d: any) => ({
           type: "districts",
           id: d.id,
-          label: d.district_name
+          label: d.district_name,
         }));
     });
 
@@ -111,7 +113,7 @@ class index extends Component<any> {
     const data = this.generateBarChartData(
       "regulatoryStatuses",
       "facility_regulatory_status",
-      "regulatoryStatus"
+      "regulatoryStatus",
     );
 
     const registered = data
@@ -124,14 +126,14 @@ class index extends Component<any> {
 
     const pending = data
       .filter(
-        (val: any) => val.name != "Registered" && val.name != "Not Registered"
+        (val: any) => val.name != "Registered" && val.name != "Not Registered",
       )
       .reduce((acc: any, cur: any) => Number(acc) + Number(cur.count), 0);
 
     return [
       { name: "Registered", value: registered },
       { name: "Pending", value: pending },
-      { name: "Not Registered", value: notRegistered }
+      { name: "Not Registered", value: notRegistered },
     ];
   };
 
@@ -139,7 +141,7 @@ class index extends Component<any> {
     const data = this.generateBarChartData(
       "operationalStatuses",
       "facility_operational_status",
-      "status"
+      "status",
     );
 
     const opened = data
@@ -153,14 +155,14 @@ class index extends Component<any> {
     const closed = data
       .filter(
         (val: any) =>
-          val.name != "Functional" && val.name != "Closed (Temporary)"
+          val.name != "Functional" && val.name != "Closed (Temporary)",
       )
       .reduce((acc: any, cur: any) => Number(acc) + Number(cur.count), 0);
 
     return [
       { name: "Functional", value: opened },
       { name: "Closed (Temporary)", value: tempClosed },
-      { name: "Closed", value: closed }
+      { name: "Closed", value: closed },
     ];
   };
   // make sure you have the svg file in images folder
@@ -170,42 +172,46 @@ class index extends Component<any> {
       title: "Total Facilities",
       type: "All",
       icon: "hospital.svg",
-      onClick: () => {}
+      onClick: () => {},
     },
     {
       count: this.getFacilitiesOfType("District Hospital"),
       title: "Hospitals",
       type: "District Hospital",
       icon: "district.svg",
-      onClick: () => {}
+      onClick: () => {},
     },
     {
       count: this.getFacilitiesOfType("Health Centre"),
       title: "Health Centers",
       type: "Health Centre",
       icon: "clinic.svg",
-      onClick: () => {}
+      onClick: () => {},
     },
     {
       count: this.getFacilitiesOfType("Dispensary"),
       title: "Dispensaries",
       type: "Dispensary",
       icon: "normal-hospital.svg",
-      onClick: () => {}
+      onClick: () => {},
     },
     {
       count: this.getFacilitiesOfType("Health Post"),
       title: "Health Posts",
       type: "Health Post",
       icon: "tent.svg",
-      onClick: () => {}
-    }
+      onClick: () => {},
+    },
   ];
   render() {
+    console.log({ districtFilter: this.state.districtsFilter });
+    console.log({ facilities: this.getFilteredFacilities() });
     return (
       <Dashboard
         cardsData={this.getFacilitiesByTypeData()}
-        districts={this.props.districts.map((district: any) => district.district_name)}
+        districts={this.props.districts.map(
+          (district: any) => district.district_name,
+        )}
         licenseStatusGrapphData={this.getRegulatoryBarData()}
         operationalStatusGraphData={this.getOperationalBarData()}
         selectedDistricts={this.state.districtsFilter}
@@ -227,10 +233,11 @@ const mapStateToProps = (state: any) => ({
   operationalStatuses: state.dependancies.operationalStatuses.list,
   regulatoryStatuses: state.dependancies.regulatoryStatuses.list,
   facilities: state.facilities.list,
-  facilityTypes: state.dependancies.facilityTypes.list
+  facilityTypes: state.dependancies.facilityTypes.list,
 });
 
-export default connect(
-  mapStateToProps,
-  { removeAllFilterValue, addFilterValue, setActivePage }
-)(index);
+export default connect(mapStateToProps, {
+  removeAllFilterValue,
+  addFilterValue,
+  setActivePage,
+})(index);
