@@ -6,7 +6,7 @@ import {
   ListSubheader,
   ListItemText,
   MenuItem,
-  Select
+  Select,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import styled, { css } from "styled-components";
@@ -21,7 +21,7 @@ const STATUS_COLORS: Record<string, string> = {
   "Not Registered": "#B8C7DA",
   Functional: "#003D38",
   "Closed (Temporary)": "#4355B9",
-  Closed: "#BA1A1A"
+  Closed: "#BA1A1A",
 };
 
 const STATUS_BACKGROUNDS: Record<string, string> = {
@@ -30,7 +30,7 @@ const STATUS_BACKGROUNDS: Record<string, string> = {
   "Not Registered": "rgba(184, 199, 218, 0.22)",
   Functional: "rgba(0, 61, 56, 0.1)",
   "Closed (Temporary)": "rgba(67, 85, 185, 0.12)",
-  Closed: "rgba(186, 26, 26, 0.1)"
+  Closed: "rgba(186, 26, 26, 0.1)",
 };
 
 const getStatusColor = (name: string) => STATUS_COLORS[name] || "#003178";
@@ -46,13 +46,13 @@ const buildDonutSegments = (data: Array<StatusDatum>) => {
   const total = getTotal(data);
   let offset = 0;
 
-  return data.map(item => {
+  return data.map((item) => {
     const value = Number(item.value || 0);
     const percent = total > 0 ? (value / total) * 100 : 0;
     const segment = {
       ...item,
       percent,
-      offset
+      offset,
     };
 
     offset += percent;
@@ -61,7 +61,7 @@ const buildDonutSegments = (data: Array<StatusDatum>) => {
 };
 
 const getActiveOperationalStatus = (data: Array<StatusDatum>) =>
-  data.find(item => item.name === "Functional") || data[0];
+  data.find((item) => item.name === "Functional") || data[0];
 
 const Dashboard = (props: Props) => {
   const {
@@ -72,8 +72,9 @@ const Dashboard = (props: Props) => {
     selectedDistricts,
     onRemoveDistrictFilter,
     onMapClick,
-    onSummaryCardClick
+    onSummaryCardClick,
   } = props;
+
   const [mobileDistrictSearch, setMobileDistrictSearch] = useState("");
 
   const primaryCard = cardsData[0];
@@ -81,27 +82,34 @@ const Dashboard = (props: Props) => {
   const operationalTotal = getTotal(operationalStatusGraphData);
   const licenseTotal = getTotal(licenseStatusGrapphData);
   const operationalFocus = getActiveOperationalStatus(
-    operationalStatusGraphData
+    operationalStatusGraphData,
   );
+
   const operationalShare =
     operationalTotal > 0
-      ? Math.round((Number(operationalFocus.value || 0) / operationalTotal) * 100)
+      ? Math.round(
+          (Number(operationalFocus?.value || 0) / operationalTotal) * 100,
+        )
       : 0;
+
   const donutSegments = buildDonutSegments(operationalStatusGraphData);
+
   const scopeLabel =
     selectedDistricts.length > 0
       ? `${selectedDistricts.length} district${
           selectedDistricts.length > 1 ? "s" : ""
         } selected`
       : "National registry view";
+
   const districtNames = useMemo(
     () =>
       districts
         .filter(Boolean)
         .slice()
         .sort((left, right) => left.localeCompare(right)),
-    [districts]
+    [districts],
   );
+
   const filteredDistrictNames = useMemo(() => {
     const query = mobileDistrictSearch.trim().toLowerCase();
 
@@ -109,8 +117,8 @@ const Dashboard = (props: Props) => {
       return districtNames;
     }
 
-    return districtNames.filter(district =>
-      district.toLowerCase().includes(query)
+    return districtNames.filter((district) =>
+      district.toLowerCase().includes(query),
     );
   }, [districtNames, mobileDistrictSearch]);
 
@@ -121,7 +129,7 @@ const Dashboard = (props: Props) => {
 
     if (nextSelectedDistricts.length > selectedDistricts.length) {
       const addedDistrict = nextSelectedDistricts.find(
-        (district: string) => !selectedDistricts.includes(district)
+        (district: string) => !selectedDistricts.includes(district),
       );
 
       if (addedDistrict) {
@@ -132,7 +140,7 @@ const Dashboard = (props: Props) => {
     }
 
     const removedDistrict = selectedDistricts.find(
-      district => !nextSelectedDistricts.includes(district)
+      (district) => !nextSelectedDistricts.includes(district),
     );
 
     if (removedDistrict) {
@@ -152,6 +160,7 @@ const Dashboard = (props: Props) => {
                   <RegistryTitle>District Explorer</RegistryTitle>
                 </div>
               </RegistryBadge>
+
               <ExplorerLead>
                 Click districts on the map to filter every metric on the
                 dashboard.
@@ -162,6 +171,7 @@ const Dashboard = (props: Props) => {
                   <ScopeMeta>Mobile Filter</ScopeMeta>
                   <MobileFilterTitle>Select Districts</MobileFilterTitle>
                 </MobileFilterHeader>
+
                 {districtNames.length > 0 ? (
                   <MobileSelectField variant="outlined">
                     <Select
@@ -183,20 +193,20 @@ const Dashboard = (props: Props) => {
                         getContentAnchorEl: null,
                         anchorOrigin: {
                           vertical: "bottom",
-                          horizontal: "left"
+                          horizontal: "left",
                         },
                         transformOrigin: {
                           vertical: "top",
-                          horizontal: "left"
+                          horizontal: "left",
                         },
                         PaperProps: {
                           style: {
-                            maxHeight: 280
-                          }
+                            maxHeight: 280,
+                          },
                         },
                         MenuListProps: {
-                          autoFocusItem: false
-                        }
+                          autoFocusItem: false,
+                        },
                       }}
                       onClose={() => setMobileDistrictSearch("")}
                       data-test="mobileDistrictDropdown"
@@ -206,15 +216,16 @@ const Dashboard = (props: Props) => {
                           autoFocus
                           value={mobileDistrictSearch}
                           placeholder="Search districts"
-                          onChange={event =>
+                          onChange={(event) =>
                             setMobileDistrictSearch(event.target.value)
                           }
-                          onClick={event => event.stopPropagation()}
-                          onKeyDown={event => event.stopPropagation()}
+                          onClick={(event) => event.stopPropagation()}
+                          onKeyDown={(event) => event.stopPropagation()}
                         />
                       </ListSubheader>
+
                       {filteredDistrictNames.length > 0 ? (
-                        filteredDistrictNames.map(district => (
+                        filteredDistrictNames.map((district) => (
                           <MenuItem key={district} value={district}>
                             <Checkbox
                               checked={selectedDistricts.includes(district)}
@@ -224,7 +235,9 @@ const Dashboard = (props: Props) => {
                           </MenuItem>
                         ))
                       ) : (
-                        <MenuItem disabled>No districts match your search</MenuItem>
+                        <MenuItem disabled>
+                          No districts match your search
+                        </MenuItem>
                       )}
                     </Select>
                   </MobileSelectField>
@@ -240,6 +253,7 @@ const Dashboard = (props: Props) => {
                   <MapTitle>Facility Distribution</MapTitle>
                   <MapHint>Interactive district filter</MapHint>
                 </MapHeader>
+
                 <MapContainer>
                   <Map
                     districtsSelected={selectedDistricts}
@@ -254,9 +268,10 @@ const Dashboard = (props: Props) => {
               <ScopeCard>
                 <ScopeMeta>Selected Districts</ScopeMeta>
                 <ScopeValue>{scopeLabel}</ScopeValue>
+
                 <SelectedDistricts>
                   {selectedDistricts.length > 0 ? (
-                    selectedDistricts.map(district => (
+                    selectedDistricts.map((district) => (
                       <DistrictChip key={district}>
                         <span>{district}</span>
                         <DistrictChipButton
@@ -264,7 +279,7 @@ const Dashboard = (props: Props) => {
                           aria-label={`Remove ${district}`}
                           onClick={() => onRemoveDistrictFilter(district)}
                         >
-                          x
+                          ×
                         </DistrictChipButton>
                       </DistrictChip>
                     ))
@@ -276,7 +291,6 @@ const Dashboard = (props: Props) => {
                   )}
                 </SelectedDistricts>
               </ScopeCard>
-
             </ExplorerCard>
           </SidebarColumn>
 
@@ -291,6 +305,7 @@ const Dashboard = (props: Props) => {
                     posture from a single editorial workspace.
                   </HeroDescription>
                 </div>
+
                 <HeroMetaGroup>
                   <MetaPill>{scopeLabel}</MetaPill>
                 </HeroMetaGroup>
@@ -310,13 +325,21 @@ const Dashboard = (props: Props) => {
                       />
                       <PrimarySummaryBadge>Registry Total</PrimarySummaryBadge>
                     </PrimaryCardTop>
-                    <PrimarySummaryCount>{formatCount(primaryCard.count)}</PrimarySummaryCount>
-                    <PrimarySummaryTitle>{primaryCard.title}</PrimarySummaryTitle>
+
+                    <PrimarySummaryCount>
+                      {formatCount(primaryCard.count)}
+                    </PrimarySummaryCount>
+
+                    <PrimarySummaryTitle>
+                      {primaryCard.title}
+                    </PrimarySummaryTitle>
+
                     <PrimarySummaryFoot>
                       <PrimarySummaryHint>
                         Open the facilities list with the current district
                         filters applied.
                       </PrimarySummaryHint>
+
                       <PrimarySummaryScope>
                         {selectedDistricts.length > 0
                           ? `${selectedDistricts.length} district filter${
@@ -328,7 +351,7 @@ const Dashboard = (props: Props) => {
                   </PrimarySummaryCard>
                 )}
 
-                {secondaryCards.map(card => (
+                {secondaryCards.map((card) => (
                   <SecondarySummaryCard
                     key={card.title}
                     type="button"
@@ -344,9 +367,16 @@ const Dashboard = (props: Props) => {
                       </SecondarySummaryIconWrap>
                       <SecondarySummaryType>Facility Type</SecondarySummaryType>
                     </SecondarySummaryHeader>
-                    <SecondarySummaryCount>{formatCount(card.count)}</SecondarySummaryCount>
+
+                    <SecondarySummaryCount>
+                      {formatCount(card.count)}
+                    </SecondarySummaryCount>
+
                     <SecondarySummaryTitle>{card.title}</SecondarySummaryTitle>
-                    <SecondarySummaryHint>View matching facilities</SecondarySummaryHint>
+
+                    <SecondarySummaryHint>
+                      View matching facilities
+                    </SecondarySummaryHint>
                   </SecondarySummaryCard>
                 ))}
               </SummaryGrid>
@@ -359,8 +389,8 @@ const Dashboard = (props: Props) => {
                     data={operationalStatusGraphData}
                     height={120}
                     width={120}
-                    scheme={operationalStatusGraphData.map(item =>
-                      getStatusColor(item.name)
+                    scheme={operationalStatusGraphData.map((item) =>
+                      getStatusColor(item.name),
                     )}
                   />
                 </CompatibilityLayer>
@@ -368,7 +398,9 @@ const Dashboard = (props: Props) => {
                 <CardHeader>
                   <div>
                     <SectionEyebrow>Operations</SectionEyebrow>
-                    <SectionTitle>Facilities by Operational Status</SectionTitle>
+                    <SectionTitle>
+                      Facilities by Operational Status
+                    </SectionTitle>
                   </div>
                 </CardHeader>
 
@@ -384,7 +416,7 @@ const Dashboard = (props: Props) => {
                         strokeWidth="3.2"
                       />
                       <g transform="rotate(-90 21 21)">
-                        {donutSegments.map(segment => (
+                        {donutSegments.map((segment) => (
                           <circle
                             key={segment.name}
                             cx="21"
@@ -402,18 +434,20 @@ const Dashboard = (props: Props) => {
                         ))}
                       </g>
                     </DonutChart>
+
                     <DonutCenter>
                       <DonutPercent>{operationalShare}%</DonutPercent>
-                      <DonutLabel>{operationalFocus.name}</DonutLabel>
+                      <DonutLabel>{operationalFocus?.name}</DonutLabel>
                     </DonutCenter>
                   </DonutWrap>
 
                   <StatusList>
-                    {operationalStatusGraphData.map(item => {
+                    {operationalStatusGraphData.map((item) => {
                       const percent =
                         operationalTotal > 0
                           ? Math.round(
-                              (Number(item.value || 0) / operationalTotal) * 100
+                              (Number(item.value || 0) / operationalTotal) *
+                                100,
                             )
                           : 0;
 
@@ -425,11 +459,9 @@ const Dashboard = (props: Props) => {
                             />
                             <StatusName>{item.name}</StatusName>
                           </StatusMeta>
+
                           <StatusValues>
-                            <StatusShare>
-                              {percent}
-                              %
-                            </StatusShare>
+                            <StatusShare>{percent}%</StatusShare>
                             <StatusCount>{formatCount(item.value)}</StatusCount>
                           </StatusValues>
                         </StatusRow>
@@ -445,8 +477,8 @@ const Dashboard = (props: Props) => {
                     data={licenseStatusGrapphData}
                     height={120}
                     width={120}
-                    scheme={licenseStatusGrapphData.map(item =>
-                      getStatusColor(item.name)
+                    scheme={licenseStatusGrapphData.map((item) =>
+                      getStatusColor(item.name),
                     )}
                   />
                 </CompatibilityLayer>
@@ -456,15 +488,18 @@ const Dashboard = (props: Props) => {
                     <SectionEyebrow>Licensing</SectionEyebrow>
                     <SectionTitle>Facilities by License Status</SectionTitle>
                   </div>
-                  <StatusHighlight>Filtered against current scope</StatusHighlight>
+
+                  <StatusHighlight>
+                    Filtered against current scope
+                  </StatusHighlight>
                 </CardHeader>
 
                 <LicenseList>
-                  {licenseStatusGrapphData.map(item => {
+                  {licenseStatusGrapphData.map((item) => {
                     const percent =
                       licenseTotal > 0
                         ? Math.round(
-                            (Number(item.value || 0) / licenseTotal) * 100
+                            (Number(item.value || 0) / licenseTotal) * 100,
                           )
                         : 0;
 
@@ -474,19 +509,21 @@ const Dashboard = (props: Props) => {
                           <LicenseName>{item.name}</LicenseName>
                           <LicenseValue>{formatCount(item.value)}</LicenseValue>
                         </LicenseRowHeader>
+
                         <LicenseBarTrack>
                           <LicenseBarFill
                             style={{
                               background: getStatusColor(item.name),
-                              width: `${percent}%`
+                              width: `${percent}%`,
                             }}
                           />
                         </LicenseBarTrack>
+
                         <LicenseMeta>
                           <LicensePercent
                             style={{
                               background: getStatusBackground(item.name),
-                              color: getStatusColor(item.name)
+                              color: getStatusColor(item.name),
                             }}
                           >
                             {percent}% of facilities
@@ -539,8 +576,16 @@ const PageShell = styled.div`
   min-height: 100%;
   padding: 32px 0 48px;
   background:
-    radial-gradient(circle at top right, rgba(67, 85, 185, 0.08), transparent 32%),
-    radial-gradient(circle at bottom left, rgba(0, 61, 56, 0.08), transparent 26%),
+    radial-gradient(
+      circle at top right,
+      rgba(67, 85, 185, 0.08),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(0, 61, 56, 0.08),
+      transparent 26%
+    ),
     #fcf9f8;
 `;
 
@@ -637,14 +682,14 @@ const MobileSelectInput = withStyles({
     backgroundColor: "#f6f3f2",
     boxShadow: "inset 0 0 0 1px rgba(0, 49, 120, 0.08)",
     paddingLeft: "16px",
-    paddingRight: "16px"
+    paddingRight: "16px",
   },
   input: {
     padding: "14px 28px 14px 0",
     fontSize: "15px",
     fontWeight: 600,
-    color: "rgba(27, 28, 28, 0.86)"
-  }
+    color: "rgba(27, 28, 28, 0.86)",
+  },
 })(InputBase);
 
 const MobileSearchInput = styled.input`
@@ -714,9 +759,10 @@ const DistrictChipButton = styled.button`
   background: transparent;
   padding: 0;
   color: #4355b9;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+  line-height: 1;
 `;
 
 const EmptyStateMessage = styled.p`
@@ -865,9 +911,7 @@ const PrimarySummaryCard = styled.button`
   border-radius: 32px;
   padding: 26px;
   color: #ffffff;
-  background:
-    linear-gradient(140deg, #003178, #4355b9 78%),
-    #003178;
+  background: linear-gradient(140deg, #003178, #4355b9 78%), #003178;
   box-shadow: 0 28px 70px rgba(0, 49, 120, 0.24);
 
   &::after {
@@ -1053,7 +1097,7 @@ const InsightGrid = styled.div`
 
 const StatusCard = styled.div`
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   display: grid;
   gap: 26px;
   min-height: 100%;
@@ -1111,20 +1155,34 @@ const StatusHighlight = styled.div`
 
 const OperationalLayout = styled.div`
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 28px;
+  grid-template-columns: minmax(220px, 280px) minmax(260px, 1fr);
   align-items: center;
+  gap: 24px;
+  width: 100%;
 
-  @media (max-width: 720px) {
+  @media (min-width: 1181px) and (max-width: 1760px) {
     grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 22px;
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 22px;
   }
 `;
 
 const DonutWrap = styled.div`
   position: relative;
-  width: 220px;
-  height: 220px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+
+  @media (max-width: 480px) {
+    max-width: 220px;
+  }
 `;
 
 const DonutChart = styled.svg`
@@ -1143,16 +1201,20 @@ const DonutCenter = styled.div`
 `;
 
 const DonutPercent = styled.div`
-  font-size: 44px;
+  font-size: 56px;
   font-weight: 900;
-  line-height: 0.95;
+  line-height: 0.9;
   color: #003d38;
+
+  @media (max-width: 480px) {
+    font-size: 44px;
+  }
 `;
 
 const DonutLabel = styled.div`
-  margin-top: 8px;
-  max-width: 120px;
-  font-size: 12px;
+  margin-top: 10px;
+  max-width: 140px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1161,55 +1223,71 @@ const DonutLabel = styled.div`
 
 const StatusList = styled.div`
   display: grid;
-  gap: 14px;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
 `;
 
 const StatusRow = styled.div`
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 16px;
-  padding: 14px 16px;
-  border-radius: 18px;
+  column-gap: 12px;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
   background: #f6f3f2;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+
+  &:hover {
+    background: #ece8e7;
+    transform: translateX(2px);
+  }
 `;
 
 const StatusMeta = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
 `;
 
 const StatusDot = styled.div`
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 999px;
+  flex-shrink: 0;
 `;
 
 const StatusName = styled.div`
-  font-size: 15px;
-  font-weight: 700;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
   color: #1b1c1c;
+  white-space: normal;
+  word-break: break-word;
 `;
 
 const StatusValues = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: contents;
 `;
 
 const StatusShare = styled.div`
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   color: #6e7480;
+  white-space: nowrap;
 `;
 
 const StatusCount = styled.div`
-  min-width: 48px;
-  font-size: 18px;
-  font-weight: 900;
+  min-width: 28px;
+  font-size: 14px;
+  font-weight: 800;
   text-align: right;
   color: #1b1c1c;
+  white-space: nowrap;
 `;
 
 const LicenseList = styled.div`
