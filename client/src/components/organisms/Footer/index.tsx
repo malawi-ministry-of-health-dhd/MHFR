@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Grid } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
 
 export default () => {
   return (
@@ -8,11 +8,17 @@ export default () => {
       <Container>
         <Grid container>
           <Grid item xs={12} sm={12} md={6}>
-            <img
-              style={{ width: 90, height: 30 }}
-              src="/static/images/kuunika_logo.png"
-              alt="Kuunika"
-            />
+            <Box display="flex" alignItems="center">
+              <img
+                style={{ width: 30, height: 30 }}
+                src="/static/images/linlogo.png"
+              />
+              <img
+                style={{ width: 90, height: 30 }}
+                src="/static/images/kuunika_logo.png"
+                alt="Kuunika"
+              />
+            </Box>
           </Grid>
 
           <Grid item xs={12} sm={12} md={6} style={{ textAlign: "right" }}>
