@@ -30,13 +30,16 @@ const FilterDrawer = (props: Props) => {
   );
 };
 
-type Props = {
-  classes?: any;
+type OwnProps = {
   open: boolean;
-  dependancies?: any;
-  filterOptions?: Array<any>;
   onAddFilter: Function;
   onRemoveFilter: Function;
+};
+
+type Props = OwnProps & {
+  classes?: any;
+  dependancies?: any;
+  filterOptions?: Array<any>;
 };
 
 const FilterContainer = styled<any>("div")`
@@ -52,7 +55,9 @@ const mapStateToProps = (state: any) => ({
   filterOptions: state.facilities.advancedFilter.filterValues
 });
 
-export default connect(
+const ConnectedMobileFilterDrawer = connect(
   mapStateToProps,
   null
 )(FilterDrawer);
+
+export default ConnectedMobileFilterDrawer as React.ComponentType<OwnProps>;

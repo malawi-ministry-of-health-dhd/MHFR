@@ -125,6 +125,7 @@ type Props = {
 
 export default withStyles(styles)(ClickAway);
 
+//@ts-ignore
 const Container = styled<any>("div")`
   border-bottom: ${props => props.active && "3px solid white"};
   background-color: ${props => props.active && "rgba(0,0,0,0.2)"};

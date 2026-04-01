@@ -27,6 +27,7 @@ type Props = {
   facilities: Array<any>;
   filteredFacilities: Array<any>;
   owners: Array<any>;
+  dependancies: any;
   fetchOwners: Function;
   history?: any;
   addFilterValue: Function;
@@ -47,6 +48,7 @@ const mapStateToProps = (state: any) => {
     facilities: state.facilities.list,
     filteredFacilities: state.facilities.filteredList,
     owners: state.dependancies.owners.list,
+    dependancies: state.dependancies,
     loading: state.status
   };
 };

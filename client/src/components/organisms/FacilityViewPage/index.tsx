@@ -3,7 +3,13 @@ import { Grid } from "@material-ui/core";
 import Title from "../../molecules/PageTitle";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHospital, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faHospital,
+  faEdit,
+  faTrash,
+  faChevronDown,
+  faChevronUp,
+} from "@fortawesome/free-solid-svg-icons";
 import Container from "../../atoms/Container";
 import OptionsBar from "../../molecules/FacilityViewOptionsBar";
 import Card from "../../atoms/Card";
@@ -25,7 +31,7 @@ import { IFacilityCurrent } from "../../../services/types";
 
 library.add(faHospital, faEdit);
 
-function index(props: Props) {
+function FacilityViewPage(props: Props) {
   const {
     basic,
     resources,
@@ -34,21 +40,38 @@ function index(props: Props) {
     pageHeader,
     activePage,
     downloadFacility,
-    badge
+    badge,
   } = props;
+  const [detailsCollapsed, setDetailsCollapsed] = React.useState(false);
+  const detailsPanelRef = React.useRef<HTMLDivElement | null>(null);
+  const [detailsPanelWidth, setDetailsPanelWidth] = React.useState(0);
+
+  React.useEffect(() => {
+    const updateDetailsPanelWidth = () => {
+      setDetailsPanelWidth(detailsPanelRef.current?.offsetWidth || 0);
+    };
+
+    updateDetailsPanelWidth();
+    window.addEventListener("resize", updateDetailsPanelWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateDetailsPanelWidth);
+    };
+  }, [activePage, detailsCollapsed]);
+
   const position =
     basic.geolocations && basic.geolocations.latitude != ""
       ? {
           lat: parseFloat(basic.geolocations.latitude),
-          lng: parseFloat(basic.geolocations.longitude)
+          lng: parseFloat(basic.geolocations.longitude),
         }
       : { lat: -13.9626121, lng: 33.7741195 };
   const acAction =
     activePage == FacilityPages.summary
       ? "basic_details"
       : activePage == FacilityPages.contact
-      ? "contact_location_details"
-      : activePage;
+        ? "contact_location_details"
+        : activePage;
   return (
     <Container style={{ padding: "16px" }}>
       <Grid container spacing={3}>
@@ -95,47 +118,76 @@ function index(props: Props) {
           </Card>
         </Grid>
         <Grid item xs={12} sm={12} md={12}>
-          <div style={{ height: "57vh" }}>
-            <FacilityGoogleMap position={position} isMarkerShown />
+          <MapStage>
+            <FacilityGoogleMap
+              position={position}
+              isMarkerShown
+              rightInset={detailsPanelWidth}
+            />
             <DetailsContainer>
-              <Grid container>
-                <Grid item md={4} className="hide-on-small-only" />
-                <Grid item xs={12} sm={12} md={8}>
-                  <Card
-                    heading={
-                      <CardTitle>
-                        <div>{pageHeader}</div>
+              <DetailsPanel ref={detailsPanelRef}>
+                <Card
+                  heading={
+                    <CardTitle>
+                      <div>{pageHeader}</div>
+                      <CardActions>
                         {isLoggedIn() && (
-                          <>
-                            <Ac
-                              role={getUser().role}
-                              action={
-                                `facility:${acAction}:update` as acActions
-                              }
-                              allowed={() => (
-                                <Link
-                                  to={`/facilities/${basic.id}/${activePage}/edit`}
+                          <Ac
+                            role={getUser().role}
+                            action={`facility:${acAction}:update` as acActions}
+                            allowed={() => (
+                              <Link
+                                to={`/facilities/${basic.id}/${activePage}/edit`}
+                              >
+                                <Button
+                                  theme="secondary"
+                                  icon={
+                                    <FontAwesomeIcon
+                                      icon={faEdit}
+                                      data-test="facilityUpdateButton"
+                                    />
+                                  }
                                 >
-                                  <Button
-                                    theme="secondary"
-                                    icon={
-                                      <FontAwesomeIcon
-                                        icon={faEdit}
-                                        data-test="facilityUpdateButton"
-                                      />
-                                    }
-                                  >
-                                    Update Facility
-                                  </Button>
-                                </Link>
-                              )}
-                            />
-                          </>
+                                  Update Facility
+                                </Button>
+                              </Link>
+                            )}
+                          />
                         )}
-                      </CardTitle>
-                    }
-                    style={{ zIndex: "1", position: "relative" }}
-                    bodyStyle={{ padding: "20px" }}
+                        <CollapseButton
+                          type="button"
+                          aria-expanded={!detailsCollapsed}
+                          aria-label={
+                            detailsCollapsed
+                              ? "Show facility details"
+                              : "Hide facility details"
+                          }
+                          data-test="toggleFacilityDetails"
+                          onClick={() => setDetailsCollapsed(!detailsCollapsed)}
+                        >
+                          <FontAwesomeIcon
+                            icon={
+                              detailsCollapsed ? faChevronDown : faChevronUp
+                            }
+                          />
+                          {detailsCollapsed ? "Show details" : "Hide details"}
+                        </CollapseButton>
+                      </CardActions>
+                    </CardTitle>
+                  }
+                  style={{ position: "relative", pointerEvents: "auto" }}
+                  bodyStyle={
+                    detailsCollapsed
+                      ? { padding: "0px", marginBottom: 0 }
+                      : { padding: "20px" }
+                  }
+                >
+                  <CollapsibleContent
+                    style={{
+                      maxHeight: detailsCollapsed ? "0px" : "35vh",
+                      opacity: detailsCollapsed ? 0 : 1,
+                      pointerEvents: detailsCollapsed ? "none" : "auto",
+                    }}
                   >
                     <FacilityPage>
                       {activePage == FacilityPages.summary && (
@@ -163,11 +215,11 @@ function index(props: Props) {
                           <ServicesPage services={services} />
                         ))}
                     </FacilityPage>
-                  </Card>
-                </Grid>
-              </Grid>
+                  </CollapsibleContent>
+                </Card>
+              </DetailsPanel>
             </DetailsContainer>
-          </div>
+          </MapStage>
         </Grid>
       </Grid>
     </Container>
@@ -186,13 +238,24 @@ type Props = {
   downloadFacility: Function;
   badge: any;
 };
-export default index;
+export default FacilityViewPage;
+
+const MapStage = styled.div`
+  position: relative;
+  height: 57vh;
+`;
 
 const DetailsContainer = styled.div`
-  margin-top: 10px;
-  @media (min-width: 390px) {
-    margin-top: -50vh;
-  }
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 600;
+  pointer-events: none;
+`;
+
+const DetailsPanel = styled.div`
+  width: 100%;
+  max-width: 600px;
 `;
 
 const FacilityPage = styled.div`
@@ -201,8 +264,47 @@ const FacilityPage = styled.div`
   overflow: scroll;
 `;
 
+const CollapsibleContent = styled.div`
+  overflow: hidden;
+  transition:
+    max-height 0.24s ease,
+    opacity 0.2s ease;
+`;
+
 const CardTitle = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+`;
+
+const CardActions = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+`;
+
+const CollapseButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.56);
+  }
 `;

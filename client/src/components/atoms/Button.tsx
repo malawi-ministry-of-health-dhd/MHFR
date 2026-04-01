@@ -23,7 +23,7 @@ const Button = (props: Props) => {
   return (
     <ThemeProvider theme={btnTheme}>
       <Btn
-        {...type}
+        {...(typeof type==='object'? type : {})}
         style={style}
         disabled={disabled}
         className={buttonClass}

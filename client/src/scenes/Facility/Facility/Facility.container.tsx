@@ -10,6 +10,7 @@ function FacilityContainer(props: Props) {
     drawerOpen,
     history,
     owners,
+    dependancies,
     loading,
     fetchOwners,
     filterOptions,
@@ -59,12 +60,21 @@ function FacilityContainer(props: Props) {
     loading.servicesAdvancedFilter ||
     loading.fetchFacilities;
 
-  const downloadFileIn = (format: "pdf" | "csv" | "excel") => {
+  const downloadFileIn = (
+    format: "pdf" | "csv" | "excel",
+    facilityIdsOverride?: Array<number>
+  ) => {
     const { filterOptions } = props;
     const facilityIds =
-      filterOptions.length > 0 ? filteredFacilities.map(f => f.id) : [];
+      facilityIdsOverride !== undefined
+        ? facilityIdsOverride
+        : filterOptions.length > 0
+        ? filteredFacilities.map(f => f.id)
+        : [];
     const whereClause =
-      filterOptions.length > 0 ? { id: { inq: facilityIds } } : {};
+      facilityIdsOverride !== undefined || filterOptions.length > 0
+        ? { id: { inq: facilityIds } }
+        : {};
     window.open(
       `${API}/facilities/download?data=` +
         JSON.stringify({
@@ -138,6 +148,8 @@ function FacilityContainer(props: Props) {
       filterOptions={filterOptions}
       downloadList={downloadFileIn}
       isLoading={isLoading()}
+      totalFacilitiesCount={facilities.length}
+      dependancies={dependancies}
     />
   );
 }
@@ -150,6 +162,7 @@ type Props = {
   facilities: Array<any>;
   filteredFacilities: Array<any>;
   owners: Array<any>;
+  dependancies: any;
   fetchOwners: Function;
   history?: any;
   addFilterValue: Function;

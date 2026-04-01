@@ -31,7 +31,7 @@ import { IState } from "../services/types";
 const Slide = cssTransition({
   enter: "slideIn",
   exit: "slideOut",
-  duration: 750
+  collapseDuration: 750,
 });
 const App: React.FC = () => {
   const dispatch = useDispatch();
@@ -50,7 +50,7 @@ const App: React.FC = () => {
       } else {
         fetchUserDetails(
           user.id as any,
-          sessionStorage.getItem("token") as any
+          sessionStorage.getItem("token") as any,
         );
       }
     }
@@ -66,12 +66,12 @@ const App: React.FC = () => {
         autoClose={6000}
         closeButton={false}
         style={{
-          zIndex: "1800",
+          zIndex: 1800,
           position: "fixed",
           top: "0",
           left: "0",
           width: "100vw",
-          padding: "0px"
+          padding: "0px",
         }}
         transition={Slide}
       />

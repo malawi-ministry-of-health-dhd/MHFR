@@ -36,3 +36,8 @@ yarn-error.log*
 build/
 
 *.job.lock
+.docker-compose.env
+.history/
+reverse_proxy/certificate.crt
+reverse_proxy/certificate.key
+
