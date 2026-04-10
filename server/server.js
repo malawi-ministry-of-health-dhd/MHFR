@@ -1,5 +1,23 @@
 "use strict";
 const json2xls = require("json2xls");
+require("dotenv").config();
+const Module = require("module");
+
+const originalModuleLoad = Module._load;
+
+Module._load = function patchedModuleLoad(request, parent, isMain) {
+  const isLoopBackMySqlConnectorImport =
+    request === "mysql" &&
+    parent &&
+    parent.filename &&
+    parent.filename.indexOf("loopback-connector-mysql") !== -1;
+
+  if (isLoopBackMySqlConnectorImport) {
+    return originalModuleLoad.call(this, "mysql2", parent, isMain);
+  }
+
+  return originalModuleLoad.call(this, request, parent, isMain);
+};
 
 var loopback = require("loopback");
 var boot = require("loopback-boot");

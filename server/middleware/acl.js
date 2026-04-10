@@ -19,7 +19,9 @@ module.exports = function() {
       ? req.headers.authorization
       : req.query.access_token;
 
-    if (req.url.includes("/explorer")) {
+    const pathname = req.path || req._parsedUrl.pathname || req.url.split("?")[0];
+
+    if (isPublicPath(pathname)) {
       return next();
     }
 
@@ -82,6 +84,10 @@ module.exports = function() {
 };
 
 // helpers
+const isPublicPath = pathname => {
+  return pathname === "/" || pathname.startsWith("/explorer");
+};
+
 const getModel = url => {
   const urlParts = url.split("?")[0].split("/");
   const filteredParts = urlParts.filter(part => isNaN(part));

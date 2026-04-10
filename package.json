@@ -34,6 +34,7 @@
     "loopback-component-explorer": "^4.0.0",
     "loopback-connector-mysql": "^5.2.0",
     "moment": "^2.22.2",
+    "mysql2": "^3.21.1",
     "node-cron": "^2.0.3",
     "node-excel-export": "^1.4.4",
     "node-mailer": "^0.1.1",
